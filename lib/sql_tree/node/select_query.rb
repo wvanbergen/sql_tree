@@ -13,7 +13,8 @@ class SQLTree::Node
       raise "At least one SELECT expression is required" if self.select.empty?
       sql = (self.distinct) ? "SELECT DISTINCT " : "SELECT "
       sql << select.map { |s| s.to_sql }.join(', ')
-      sql << " FROM " << from.map { |f| f.to_sql }.join(', ')      
+      sql << " FROM " << from.map { |f| f.to_sql }.join(', ')
+      sql << " WHERE " << where.to_sql if where
       return sql
     end
   

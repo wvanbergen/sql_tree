@@ -19,7 +19,21 @@ describe SQLTree::Parser do
       @parser.parse("FROM my_table AS my_alias", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table', 'my_alias')])
     end
 
+    it "should parse multiple tables separated by commas" do
+      @parser.parse("FROM my_table_1 AS a, my_table_2 AS b", :as => :from_clause).should eql(
+          [SQLTree::Node::TableImport.new('my_table_1', 'a'), SQLTree::Node::TableImport.new('my_table_2', 'b')])
+    end
     
+  end
+  
+  context :where_clause do
+    it "should parse a simple conditions" do
+      @parser.parse("WHERE 1", :as => :where_clause).should parse_as(1)
+    end
+    
+    it "should parse a simple comparison" do
+      @parser.parse("WHERE (2 > 1)", :as => :where_clause).should parse_as([:gt, 2, 1])
+    end
   end
   
   context :expressions do

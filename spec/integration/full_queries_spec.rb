@@ -17,4 +17,9 @@ describe SQLTree, 'parsing and generating SQL' do
   it 'should parse and generate table aliases' do
     @parser.parse("SELECT a.* FROM tabel AS a").to_sql.should eql('SELECT "a".* FROM "tabel" AS "a"')
   end
+  
+  it "parse and generate a complex SQL query" do
+    @parser.parse('SELECT a.*,   MD5( a.name )   AS checksum   FROM  tabel  AS  a , other   WHERE   other.timestamp    >  a.timestamp').to_sql.should eql(
+                  'SELECT "a".*, MD5("a"."name") AS "checksum" FROM "tabel" AS "a", "other" WHERE ("other"."timestamp" > "a"."timestamp")')
+  end
 end

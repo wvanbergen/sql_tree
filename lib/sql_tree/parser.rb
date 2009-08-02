@@ -75,7 +75,7 @@ class SQLTree::Parser
       expr = SQLTree::Node::SelectExpression.new(parse_expression)
       if peek_token == SQLTree::Token::AS
         consume(SQLTree::Token::AS)
-        expr.variable = parse_variable_name
+        expr.variable = parse_variable_name.name
       end
       return expr
     end
@@ -209,6 +209,8 @@ class SQLTree::Parser
 
     
   def parse_where_clause
+    consume(SQLTree::Token::WHERE)
+    return parse_expression
   end
   
 end
