@@ -1,3 +1,3 @@
 class SQLTree::Node
-  
+
 end

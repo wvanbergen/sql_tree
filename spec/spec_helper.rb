@@ -7,3 +7,5 @@ require 'sql_tree'
 
 module SQLTree::Spec
 end
+
+require "#{File.dirname(__FILE__)}/lib/matchers"
