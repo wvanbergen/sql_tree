@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.rdoc_options << '--title' << s.name << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
   s.extra_rdoc_files = ['README.rdoc']
   
-  s.files = %w(README.rdoc Rakefile lib lib/sql_tree lib/sql_tree.rb lib/sql_tree/generator.rb lib/sql_tree/node lib/sql_tree/node.rb lib/sql_tree/parser.rb lib/sql_tree/tokenizer.rb spec spec/integration spec/integration/api_spec.rb spec/spec_helper.rb spec/unit spec/unit/parser_spec.rb spec/unit/tokenizer_spec.rb tasks tasks/github-gem.rake)
+  s.files = %w(README.rdoc Rakefile lib lib/sql_tree lib/sql_tree.rb lib/sql_tree/generator.rb lib/sql_tree/node lib/sql_tree/node.rb lib/sql_tree/parser.rb lib/sql_tree/token.rb lib/sql_tree/tokenizer.rb spec spec/integration spec/integration/api_spec.rb spec/lib spec/lib/matchers.rb spec/spec_helper.rb spec/unit spec/unit/parser_spec.rb spec/unit/tokenizer_spec.rb tasks tasks/github-gem.rake)
   s.test_files = %w(spec/integration/api_spec.rb spec/unit/parser_spec.rb spec/unit/tokenizer_spec.rb)
 end

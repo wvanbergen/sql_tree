@@ -29,7 +29,8 @@ class SQLTree::Tokenizer
       when /^\s?$/;        # whitespace, go to next token
       when '(';            yield(SQLTree::Token::LPAREN)
       when ')';            yield(SQLTree::Token::RPAREN)
-      when '.';            yield(SQLTree::Token::DOT)        
+      when '.';            yield(SQLTree::Token::DOT)
+      when '.';            yield(SQLTree::Token::COMMA)        
       when /\d/;           tokenize_number(&block)
       when "'";            tokenize_quoted_string(&block)
       when OPERATOR_CHARS; tokenize_operator(&block)

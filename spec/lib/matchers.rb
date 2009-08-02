@@ -1,3 +1,31 @@
+class ParseAs
+  
+  def initialize(expected_tree)
+    @expected_tree = expected_tree
+  end 
+  
+  def matches?(found_tree)
+    @found_tree = found_tree.to_tree
+    return @found_tree.eql?(@expected_tree)
+  end
+  
+  def description
+    "expected to parse to #{@expected_tree.inspect}"
+  end
+  
+  def failure_message
+    " #{@expected_tree.inspect} expected, but found #{@found_tree.inspect}"
+  end
+  
+  def negative_failure_message
+    " expected not to be tokenized to #{@expected_tree.inspect}"
+  end  
+end
+
+def parse_as(tree)
+  ParseAs.new(tree)
+end
+
 class TokenizeTo
   
   def initialize(expected_tokens)

@@ -55,6 +55,11 @@ describe SQLTree::Tokenizer do
       @tokenizer.tokenize('a."b"').should tokenize_to(sql_var('a'), dot, sql_var('b'))
     end  
     
+    it "should tokenize commas" do
+      @tokenizer.tokenize('a,"b"').should tokenize_to(sql_var('a'), comma, sql_var('b'))
+    end  
+    
+    
   end
   
   context "combined tokens"  do
