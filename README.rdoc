@@ -1,0 +1,6 @@
+=== SQLTree
+
+SQLTree is a pure Ruby library to represent SQL queries as a tree of nodes. 
+
+The library can parse an SQL query (a string) to represent the query using
+a tree, and it can generate an SQL query from a constructed tree.

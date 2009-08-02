@@ -1,0 +1,3 @@
+module SQLTree::Generator
+  
+end
