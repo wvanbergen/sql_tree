@@ -6,6 +6,22 @@ describe SQLTree::Parser do
     @parser = SQLTree::Parser.new
   end
   
+  context :from_clause do
+    it "should parse a simple table" do
+      @parser.parse("FROM my_table", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table')])
+    end
+    
+    it "should parse a simple table with implicit alias" do
+      @parser.parse("FROM my_table my_alias", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table', 'my_alias')])
+    end
+
+    it "should parse a simple table with explicit alias" do
+      @parser.parse("FROM my_table AS my_alias", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table', 'my_alias')])
+    end
+
+    
+  end
+  
   context :expressions do
   
     it "should parse a variable" do

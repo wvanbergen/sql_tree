@@ -71,6 +71,10 @@ def dot
   SQLTree::Token::DOT
 end
 
+def comma
+  SQLTree::Token::COMMA
+end
+
 def lparen
   SQLTree::Token::LPAREN
 end

@@ -12,10 +12,14 @@ class SQLTree::Node
     "'#{str.gsub(/\'/, "''")}'"
   end
   
-  def self.[](arg)
-    case arg
-      when Symbol; Variable.new(arg.to_s)
-      else;        Value.new(arg) 
+  def self.[](arg, field = nil)
+    if field.nil?
+      case arg
+        when Symbol; Variable.new(arg.to_s)
+        else;        Value.new(arg) 
+      end
+    else
+      Field[arg, field]
     end
   end
 

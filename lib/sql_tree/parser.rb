@@ -172,7 +172,7 @@ class SQLTree::Parser
     table_import = SQLTree::Node::TableImport.new(next_token.literal)
     if peek_token == SQLTree::Token::AS || SQLTree::Token::Variable === peek_token
       consume(SQLTree::Token::AS) if peek_token == SQLTree::Token::AS
-      table_import.variable = parse_variable
+      table_import.variable = parse_variable_name.name
     end
     return table_import
   end

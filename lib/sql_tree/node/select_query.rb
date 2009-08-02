@@ -50,6 +50,10 @@ class SQLTree::Node
       sql << " AS " << quote_var(@variable) if @variable
       return sql
     end
+    
+    def eql?(other)
+      other.kind_of?(self.class) && other.variable.eql?(@variable) && other.table.eql?(@table)
+    end
   
   end
   

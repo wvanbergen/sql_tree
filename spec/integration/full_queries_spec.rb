@@ -14,7 +14,7 @@ describe SQLTree, 'parsing and generating SQL' do
     @parser.parse("SELECT DISTINCT * FROM tabel").to_sql.should eql('SELECT DISTINCT * FROM "tabel"')
   end  
   
-  it '...' do
-    puts @parser.parse("SELECT tabel.* FROM tabel").to_sql    
+  it 'should parse and generate table aliases' do
+    @parser.parse("SELECT a.* FROM tabel AS a").to_sql.should eql('SELECT "a".* FROM "tabel" AS "a"')
   end
 end
