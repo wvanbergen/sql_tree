@@ -14,6 +14,6 @@ Gem::Specification.new do |s|
   s.rdoc_options << '--title' << s.name << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
   s.extra_rdoc_files = ['README.rdoc']
   
-  s.files = %w(LICENSE README.rdoc Rakefile init.rb lib lib/scoped_search lib/scoped_search.rb lib/scoped_search/query_conditions_builder.rb lib/scoped_search/query_language_parser.rb lib/scoped_search/reg_tokens.rb tasks tasks/database_tests.rake tasks/github-gem.rake test test/database.yml test/integration test/integration/api_test.rb test/lib test/lib/test_models.rb test/lib/test_schema.rb test/test_helper.rb test/unit test/unit/query_conditions_builder_test.rb test/unit/query_language_test.rb test/unit/search_for_test.rb)
-  s.test_files = %w(test/integration/api_test.rb test/unit/query_conditions_builder_test.rb test/unit/query_language_test.rb test/unit/search_for_test.rb)
+  s.files = %w(README.rdoc Rakefile lib lib/sql_tree lib/sql_tree.rb lib/sql_tree/generator.rb lib/sql_tree/node lib/sql_tree/node.rb lib/sql_tree/parser.rb lib/sql_tree/tokenizer.rb spec spec/integration spec/integration/api_spec.rb spec/spec_helper.rb spec/unit spec/unit/parser_spec.rb spec/unit/tokenizer_spec.rb tasks tasks/github-gem.rake)
+  s.test_files = %w(spec/integration/api_spec.rb spec/unit/parser_spec.rb spec/unit/tokenizer_spec.rb)
 end
