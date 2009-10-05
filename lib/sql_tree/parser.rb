@@ -1,23 +1,37 @@
 class SQLTree::Parser
 
+  class UnexpectedToken < StandardError
+    
+    attr_reader :expected_token, :actual_token
+    
+    def initialize(expected_token, actual_token)
+      @expected_token, @actual_token = expected_token, actual_token
+      super("Unexpected token: #{expected_token.inspect} expected, but found #{actual_token.inspect}.")
+    end
+  end
+
+  def self.parse(sql_string, options = {:as => :query})
+    self.new.parse(sql_string, options)
+  end
+
   def current_token
     @current_token
   end
   
   def next_token
     @current_token = @tokens.shift
-  end 
+  end
   
   def consume(check)
-    error(current_token) unless check == next_token
-  end  
+    raise UnexpectedToken.new(check, current_token) unless check == next_token
+  end
   
   def peek_token(distance = 1)
     @tokens[distance - 1]
   end
   
-  def error(token)
-    raise "Unexpected token: #{token.inspect}"
+  def error(token, check)
+    raise ParseError.new("Unexpected token: #{token.inspect} found, but #{check.inspect} expected.")
   end
   
   def debug
