@@ -53,12 +53,14 @@ class SQLTree::Token
     self.const_set(kw.upcase, Class.new(SQLTree::Token::Keyword).new(kw.upcase))
   end
   
-  ARITHMETHIC_OPERATORS = { '+' => :plus, '-' => :minus, '*' => :multiply, '/' => :divide, '%' => :modulo }
-  LOGICAL_OPERATORS     = { '=' => :eq, '!=' => :ne, '<>' => :ne, '>' => :gt, '<' => :lt, '>=' => :gte, '<=' => :lte }
+  ARITHMETHIC = { '+' => :plus, '-' => :minus, '*' => :multiply, '/' => :divide, '%' => :modulo }
+  LOGICAL     = { '=' => :eq, '!=' => :ne, '<>' => :ne, '>' => :gt, '<' => :lt, '>=' => :gte, '<=' => :lte }
 
-  OPERATORS = ARITHMETHIC_OPERATORS.merge(LOGICAL_OPERATORS)
+  OPERATORS = ARITHMETHIC.merge(LOGICAL)
   OPERATORS.each do |literal, symbol|
     self.const_set(symbol.to_s.upcase, Class.new(SQLTree::Token::Operator).new(literal)) unless self.const_defined?(symbol.to_s.upcase)
   end
+  
+  LOGICAL_OPERATORS = [SQLTree::Token::EQ, SQLTree::Token::NE, SQLTree::Token::GT, SQLTree::Token::GTE, SQLTree::Token::LT, SQLTree::Token::LTE]
 
 end

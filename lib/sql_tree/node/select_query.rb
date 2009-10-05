@@ -1,8 +1,8 @@
-class SQLTree::Node
+module SQLTree::Node
   
-  class SelectQuery < SQLTree::Node
+  class SelectQuery < Base
   
-    attr_accessor :distinct, :select, :from, :where, :group_by, :having, :order_by
+    attr_accessor :distinct, :select, :from, :where, :group_by, :having, :order_by, :limit
   
     def initialize
       @distinct = false
@@ -18,66 +18,58 @@ class SQLTree::Node
       return sql
     end
   
-  end
-  
-  class SelectExpression < SQLTree::Node
-    
-    attr_accessor :expression, :variable
-    
-    def initialize(expression, variable = nil)
-      @expression = expression
-      @variable   = variable
+    # Uses the provided initialized parser to parse a SELECT query.
+    def self.parse(parser)
+      select_node = self.new
+      parser.consume(SQLTree::Token::SELECT)
+
+      if parser.peek_token == SQLTree::Token::DISTINCT
+        parser.consume(SQLTree::Token::DISTINCT)
+        select_node.distinct = true
+      end
+
+      select_node.select = self.parse_select_clause(parser)
+      select_node.from   = self.parse_from_clause(parser)   if parser.peek_token == SQLTree::Token::FROM
+      select_node.where  = self.parse_where_clause(parser)  if parser.peek_token == SQLTree::Token::WHERE
+
+      return select_node
     end
     
-    def to_sql
-      sql = @expression.to_sql
-      sql << " AS " << quote_var(@variable) if @variable
-      return sql
+    def self.parse_select_clause(parser)
+      expressions = [SQLTree::Node::SelectExpression.parse(parser)]
+      while parser.peek_token == SQLTree::Token::COMMA
+        parser.consume(SQLTree::Token::COMMA)
+        expressions << SQLTree::Node::SelectExpression.parse(parser)
+      end
+      return expressions
     end
     
-    def ==(other)
-      other.expression == self.expression && other.variable == self.variable
-    end
-  end
-  
-  class TableImport < SQLTree::Node
-    
-    attr_accessor :table, :table_alias, :joins
-    
-    def initialize(table, table_alias = nil, joins = [])
-      @table, @table_alias, @joins = table, table_alias, joins
-    end
-  
-    def to_sql
-      sql = quote_var(table)
-      sql << " AS " << quote_var(table_alias) if table_alias
-      return sql
+    def self.parse_from_clause(parser)
+      parser.consume(SQLTree::Token::FROM)
+      from_expressions = [SQLTree::Node::TableImport.parse(parser)]
+      while parser.peek_token == SQLTree::Token::COMMA
+        parser.consume(SQLTree::Token::COMMA)
+        from_expressions << SQLTree::Node::TableImport.parse(parser)
+      end
+
+      return from_expressions      
     end
     
-    def ==(other)
-      other.table = self.table && other.table_alias == self.table_alias && other.joins == self.joins
-    end
-  end
-  
-  class Join < SQLTree::Node
-    
-    attr_accessor :join_type, :table, :table_alias, :join_expression
-    
-    def initialize(values = {})
-      values.each { |key, value| self.send(:"#{key}=", value) }
+    def self.parse_where_clause(parser)
+      parser.consume(SQLTree::Token::WHERE)
+      Expression.parse(parser)
     end
     
-    def to_sql
-      join_sql = join_type ? "#{join_type.to_s.upcase} " : ""
-      join_sql << "JOIN #{table} "
-      join_sql << "AS #{table_alias} " if table_alias
-      join_sql << "ON #{join_expression.to_sql}"
-      join_sql
+    def self.parse_group_clause(parser)
     end
     
-    def ==(other)
-      other.table = self.table && other.table_alias == self.table_alias && 
-        other.join_type == self.join_type && other.join_expression == self.join_expression
+    def self.parse_having_clause(parser)
+    end
+    
+    def self.parse_order_clause(parser)
+    end
+    
+    def self.parse_limit_clause(parser)
     end
   end
 end

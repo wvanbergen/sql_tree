@@ -3,7 +3,7 @@ require "#{File.dirname(__FILE__)}/../spec_helper"
 describe SQLTree::Parser do
   
   before(:all) do
-    @parser = SQLTree::Parser.new
+    #@parser = SQLTree::Parser.new
   end
   
   context :from_clause do
