@@ -26,13 +26,13 @@ module SQLTree::Node
       other.name == self.name && other.table == self.table
     end
     
-    def self.parse(parser)
-      lhs = parser.next_token
+    def self.parse(tokens)
+      lhs = tokens.next
       lhs = (lhs == SQLTree::Token::MULTIPLY) ? :all : lhs.literal
 
-      if parser.peek_token == SQLTree::Token::DOT
-        parser.consume(SQLTree::Token::DOT)
-        rhs = parser.next_token
+      if tokens.peek == SQLTree::Token::DOT
+        tokens.consume(SQLTree::Token::DOT)
+        rhs = tokens.next
         rhs = (rhs == SQLTree::Token::MULTIPLY) ? :all : rhs.literal      
         self.new(rhs, lhs)
       else

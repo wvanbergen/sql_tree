@@ -17,16 +17,16 @@ module SQLTree::Node
       return sql
     end
     
-    def self.parse(parser)
-      if parser.peek_token == SQLTree::Token::MULTIPLY
-        parser.consume(SQLTree::Token::MULTIPLY)
+    def self.parse(tokens)
+      if tokens.peek == SQLTree::Token::MULTIPLY
+        tokens.consume(SQLTree::Token::MULTIPLY)
         return SQLTree::Node::ALL_FIELDS
       else
-        expression = SQLTree::Node::Expression.parse(parser)
+        expression = SQLTree::Node::Expression.parse(tokens)
         expr = SQLTree::Node::SelectExpression.new(expression)
-        if parser.peek_token == SQLTree::Token::AS
-          parser.consume(SQLTree::Token::AS)
-          expr.variable = SQLTree::Node::Variable.parse(parser).name
+        if tokens.peek == SQLTree::Token::AS
+          tokens.consume(SQLTree::Token::AS)
+          expr.variable = SQLTree::Node::Variable.parse(tokens).name
         end
         return expr
       end      

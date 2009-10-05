@@ -28,21 +28,21 @@ class SQLTree::Parser
     @options = options
   end
 
-  def current_token
+  def current
     @current_token
   end
   
-  def next_token
+  def next
     @current_token = @tokens.shift
   end
   
   def consume(*checks)
     checks.each do |check|
-      raise UnexpectedToken.new(current_token, check) unless check == next_token
+      raise UnexpectedToken.new(self.current, check) unless check == self.next
     end
   end
   
-  def peek_token(distance = 1)
+  def peek(distance = 1)
     @tokens[distance - 1]
   end
   
@@ -55,9 +55,9 @@ class SQLTree::Parser
   end
   
   def parse!
-    case peek_token
+    case self.peek
     when SQLTree::Token::SELECT then SQLTree::Node::SelectQuery.parse(self)
-    else raise UnexpectedToken.new(peek_token)
+    else raise UnexpectedToken.new(self.peek)
     end
   end
 end

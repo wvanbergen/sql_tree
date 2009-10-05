@@ -19,12 +19,12 @@ module SQLTree::Node
       other.value == self.value
     end
     
-    def self.parse(parser)
-      case parser.next_token
+    def self.parse(tokens)
+      case tokens.next
       when SQLTree::Token::String, SQLTree::Token::Number
-        SQLTree::Node::Value.new(parser.current_token.literal)
+        SQLTree::Node::Value.new(tokens.current.literal)
       else
-        raise SQLTree::Parser::UnexpectedToken.new(parser.current_token, :literal)
+        raise SQLTree::Parser::UnexpectedToken.new(tokens.current, :literal)
       end      
     end
   end

@@ -23,7 +23,7 @@ module SQLTree::Node
     end
   
     # This method should be implemented by a subclass.
-    def self.parse(parser)
+    def self.parse(tokens)
       raise 'Only implemented in subclasses!'
     end
   

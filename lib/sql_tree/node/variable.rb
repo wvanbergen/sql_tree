@@ -20,15 +20,15 @@ module SQLTree::Node
       other.name == self.name
     end
 
-    def self.parse(parser)
-      if SQLTree::Token::Variable === parser.peek_token
-        if parser.peek_token(2) == SQLTree::Token::DOT
-          SQLTree::Node::Field.parse(parser)
+    def self.parse(tokens)
+      if SQLTree::Token::Variable === tokens.peek
+        if tokens.peek(2) == SQLTree::Token::DOT
+          SQLTree::Node::Field.parse(tokens)
         else
-          self.new(parser.next_token.literal)
+          self.new(tokens.next.literal)
         end
       else
-        raise SQLTree::Parser::UnexpectedToken.new(parser.peek_token, :variable)
+        raise SQLTree::Parser::UnexpectedToken.new(tokens.peek, :variable)
       end
     end
   end

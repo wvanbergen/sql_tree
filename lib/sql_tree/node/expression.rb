@@ -6,22 +6,22 @@ module SQLTree::Node
   # one of the subclasses instead.
   class Expression < Base
   
-    def self.parse(parser)
-      SQLTree::Node::LogicalExpression.parse(parser)
+    def self.parse(tokens)
+      SQLTree::Node::LogicalExpression.parse(tokens)
     end
     
-    def self.parse_single(parser)
-      if SQLTree::Token::LPAREN == parser.peek_token
-        parser.consume(SQLTree::Token::LPAREN)
-        expr = self.parse(parser)
-        parser.consume(SQLTree::Token::RPAREN)
+    def self.parse_single(tokens)
+      if SQLTree::Token::LPAREN == tokens.peek
+        tokens.consume(SQLTree::Token::LPAREN)
+        expr = self.parse(tokens)
+        tokens.consume(SQLTree::Token::RPAREN)
         return expr
-      elsif SQLTree::Token::Variable === parser.peek_token(1)  && parser.peek_token(2) == SQLTree::Token::LPAREN
-        return SQLTree::Node::FunctionExpression.parse(parser)  
-      elsif SQLTree::Token::Variable === parser.peek_token
-        return SQLTree::Node::Variable.parse(parser)
+      elsif SQLTree::Token::Variable === tokens.peek(1)  && tokens.peek(2) == SQLTree::Token::LPAREN
+        return SQLTree::Node::FunctionExpression.parse(tokens)  
+      elsif SQLTree::Token::Variable === tokens.peek
+        return SQLTree::Node::Variable.parse(tokens)
       else
-        return SQLTree::Node::Value.parse(parser)
+        return SQLTree::Node::Value.parse(tokens)
       end      
     end
   end
@@ -42,10 +42,10 @@ module SQLTree::Node
       [@operator] + @expressions.map { |e| e.to_tree }
     end
     
-    def self.parse(parser)
-      expr = ComparisonExpression.parse(parser)
-      while [SQLTree::Token::AND, SQLTree::Token::OR].include?(parser.peek_token)
-        expr = SQLTree::Node::LogicalExpression.new(parser.next_token.literal, [expr, ComparisonExpression.parse(parser)])
+    def self.parse(tokens)
+      expr = ComparisonExpression.parse(tokens)
+      while [SQLTree::Token::AND, SQLTree::Token::OR].include?(tokens.peek)
+        expr = SQLTree::Node::LogicalExpression.new(tokens.next.literal, [expr, ComparisonExpression.parse(tokens)])
       end 
       return expr      
     end
@@ -68,10 +68,10 @@ module SQLTree::Node
       [SQLTree::Token::OPERATORS[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
-    def self.parse(parser)
-      expr = SQLTree::Node::ArithmeticExpression.parse(parser)
-      while SQLTree::Token::LOGICAL_OPERATORS.include?(parser.peek_token)
-        expr = self.new(parser.next_token.literal, expr, SQLTree::Node::ArithmeticExpression.parse(parser))
+    def self.parse(tokens)
+      expr = SQLTree::Node::ArithmeticExpression.parse(tokens)
+      while SQLTree::Token::LOGICAL_OPERATORS.include?(tokens.peek)
+        expr = self.new(tokens.next.literal, expr, SQLTree::Node::ArithmeticExpression.parse(tokens))
       end
       return expr      
     end
@@ -93,14 +93,14 @@ module SQLTree::Node
       [@function.to_sym] + @arguments.map { |e| e.to_tree }
     end
     
-    def self.parse(parser)
-      expr = self.new(parser.next_token.literal)
-      parser.consume(SQLTree::Token::LPAREN)
-      until parser.peek_token == SQLTree::Token::RPAREN
-        expr.arguments << SQLTree::Node::Expression.parse(parser)
-        parser.consume(SQLTree::Token::COMMA) if parser.peek_token == SQLTree::Token::COMMA
+    def self.parse(tokens)
+      expr = self.new(tokens.next.literal)
+      tokens.consume(SQLTree::Token::LPAREN)
+      until tokens.peek == SQLTree::Token::RPAREN
+        expr.arguments << SQLTree::Node::Expression.parse(tokens)
+        tokens.consume(SQLTree::Token::COMMA) if tokens.peek == SQLTree::Token::COMMA
       end
-      parser.consume(SQLTree::Token::RPAREN)
+      tokens.consume(SQLTree::Token::RPAREN)
       return expr      
     end
   end
@@ -122,22 +122,22 @@ module SQLTree::Node
       [SQLTree::Token::OPERATORS[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
-    def self.parse(parser)
-      self.parse_primary(parser)
+    def self.parse(tokens)
+      self.parse_primary(tokens)
     end
     
-    def self.parse_primary(parser)
-      expr = self.parse_secondary(parser)
-      while [SQLTree::Token::PLUS, SQLTree::Token::MINUS].include?(parser.peek_token)
-        expr = self.new(parser.next_token.literal, expr, self.parse_secondary(parser))
+    def self.parse_primary(tokens)
+      expr = self.parse_secondary(tokens)
+      while [SQLTree::Token::PLUS, SQLTree::Token::MINUS].include?(tokens.peek)
+        expr = self.new(tokens.next.literal, expr, self.parse_secondary(tokens))
       end
       return expr
     end
     
-    def self.parse_secondary(parser)
-      expr = Expression.parse_single(parser)
-      while [SQLTree::Token::PLUS, SQLTree::Token::MINUS].include?(parser.peek_token)
-        expr = self.new(parser.next_token.literal, expr, SQLTree::Node::Expression.parse_single(parser))
+    def self.parse_secondary(tokens)
+      expr = Expression.parse_single(tokens)
+      while [SQLTree::Token::PLUS, SQLTree::Token::MINUS].include?(tokens.peek)
+        expr = self.new(tokens.next.literal, expr, SQLTree::Node::Expression.parse_single(tokens))
       end
       return expr
     end

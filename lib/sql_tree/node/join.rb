@@ -16,25 +16,25 @@ module SQLTree::Node
       join_sql
     end
     
-    def self.parse(parser)
+    def self.parse(tokens)
       join = self.new
 
-      if parser.peek_token == SQLTree::Token::FULL
+      if tokens.peek == SQLTree::Token::FULL
         join.join_type = :outer
-        parser.consume(SQLTree::Token::FULL, SQLTree::Token::OUTER)
-      elsif [SQLTree::Token::OUTER, SQLTree::Token::INNER, SQLTree::Token::LEFT, SQLTree::Token::RIGHT].include?(parser.peek_token)
-        join.join_type = parser.next_token.literal.downcase.to_sym
+        tokens.consume(SQLTree::Token::FULL, SQLTree::Token::OUTER)
+      elsif [SQLTree::Token::OUTER, SQLTree::Token::INNER, SQLTree::Token::LEFT, SQLTree::Token::RIGHT].include?(tokens.peek)
+        join.join_type = tokens.next.literal.downcase.to_sym
       end
 
-      parser.consume(SQLTree::Token::JOIN)
-      join.table = parser.next_token.literal
-      if parser.peek_token == SQLTree::Token::AS || SQLTree::Token::Variable === parser.peek_token
-        parser.consume(SQLTree::Token::AS) if parser.peek_token == SQLTree::Token::AS
-        join.table_alias = parser.next_token.literal
+      tokens.consume(SQLTree::Token::JOIN)
+      join.table = tokens.next.literal
+      if tokens.peek == SQLTree::Token::AS || SQLTree::Token::Variable === tokens.peek
+        tokens.consume(SQLTree::Token::AS) if tokens.peek == SQLTree::Token::AS
+        join.table_alias = tokens.next.literal
       end
 
-      parser.consume(SQLTree::Token::ON)
-      join.join_expression = SQLTree::Node::Expression.parse(parser)
+      tokens.consume(SQLTree::Token::ON)
+      join.join_expression = SQLTree::Node::Expression.parse(tokens)
 
       return join      
     end

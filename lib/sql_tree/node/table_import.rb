@@ -18,24 +18,24 @@ module SQLTree::Node
       other.table = self.table && other.table_alias == self.table_alias && other.joins == self.joins
     end
     
-    def self.parse(parser)
-      if SQLTree::Token::Variable === parser.peek_token
-        table_import = self.new(parser.next_token.literal)
-        if parser.peek_token == SQLTree::Token::AS || SQLTree::Token::Variable === parser.peek_token
-          parser.consume(SQLTree::Token::AS) if parser.peek_token == SQLTree::Token::AS
-          table_import.table_alias = SQLTree::Node::Variable.parse(parser).name
+    def self.parse(tokens)
+      if SQLTree::Token::Variable === tokens.peek
+        table_import = self.new(tokens.next.literal)
+        if tokens.peek == SQLTree::Token::AS || SQLTree::Token::Variable === tokens.peek
+          tokens.consume(SQLTree::Token::AS) if tokens.peek == SQLTree::Token::AS
+          table_import.table_alias = SQLTree::Node::Variable.parse(tokens).name
         end
 
         while [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT, 
                 SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL, 
-                SQLTree::Token::FULL].include?(parser.peek_token)
+                SQLTree::Token::FULL].include?(tokens.peek)
               
-          table_import.joins << Join.parse(parser)
+          table_import.joins << Join.parse(tokens)
         end
 
         return table_import
       else 
-        raise SQLTree::Parser::UnexpectedToken.new(peek_token)
+        raise SQLTree::Parser::UnexpectedToken.new(tokens.peek)
       end  
     end
   end 
