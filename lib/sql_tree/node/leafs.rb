@@ -15,10 +15,10 @@ class SQLTree::Node
       @value
     end
     
-    def eql?(other)
-      other.kind_of?(self.class) && other.value.eql?(@value)
+    def ==(other)
+      other.value == self.value
     end
-  end  
+  end
 
   class Variable < SQLTree::Node
 
@@ -36,12 +36,9 @@ class SQLTree::Node
       @name.to_sym
     end
     
-    def eql?(other)
-      other.kind_of?(self.class) && other.name.eql?(@name)
+    def ==(other)
+      other.name == self.name
     end
-    
-
-    
   end
 
   class Field < SQLTree::Node
@@ -52,27 +49,22 @@ class SQLTree::Node
       @name = name
       @table = table
     end
-    
-    def self.[](table, field)
-      self.new(field.to_s, table.to_s)
-    end
-  
+
     def quote_var(name)
       return '*' if name == :all
       super(name)
     end
-  
+
     def to_sql
       @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
     end
-    
-    def eql?(other)
-      other.kind_of?(self.class) && other.name.eql?(@name) && other.table.eql?(@table)
-    end
-    
+
     def to_tree
       to_sql.to_sym
-    end    
+    end
     
+    def ==(other)
+      other.name == self.name && other.table == self.table
+    end
   end
 end

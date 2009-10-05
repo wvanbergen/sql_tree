@@ -10,8 +10,6 @@ class SQLTree::Token
     other.class == self.class && @literal == other.literal
   end
   
-  alias :eql? :==
-  
   def inspect
     literal
   end
@@ -19,6 +17,9 @@ class SQLTree::Token
   # Token types
   
   class Value < SQLTree::Token
+    def inspect
+      "#<#{self.class.name.split('::').last}:#{literal.inspect}>"
+    end
   end
   
   class Variable < SQLTree::Token::Value
@@ -47,7 +48,7 @@ class SQLTree::Token
   DOT    = Class.new(SQLTree::Token).new('.')  
   COMMA  = Class.new(SQLTree::Token).new(',')    
   
-  KEYWORDS = %w{select from where group having order distinct left right inner outer join and or not as}
+  KEYWORDS = %w{select from where group having order distinct left right inner full outer natural join using and or not as on}
   KEYWORDS.each do |kw|
     self.const_set(kw.upcase, Class.new(SQLTree::Token::Keyword).new(kw.upcase))
   end

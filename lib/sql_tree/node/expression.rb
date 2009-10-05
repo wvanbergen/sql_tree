@@ -1,26 +1,29 @@
 class SQLTree::Node
-  
+
+  # Base class for all SQL expressions.
+  #
+  # This is an asbtract class and should not be used directly. Use
+  # one of the subclasses instead.
   class Expression < SQLTree::Node
   
   end
-  
+
   class LogicalExpression < Expression
     attr_accessor :operator, :expressions
-    
+
     def initialize(operator, expressions)
       @expressions = expressions
       @operator    = operator.to_s.downcase.to_sym
     end
-    
+
     def to_sql
       "(" + @expressions.map { |e| e.to_sql }.join(" #{@operator.to_s.upcase} ") + ")"
     end
-    
+
     def to_tree
       [@operator] + @expressions.map { |e| e.to_tree }
-    end    
+    end
   end
-
 
   class ComparisonExpression < Expression
     attr_accessor :lhs, :rhs, :operator

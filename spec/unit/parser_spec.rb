@@ -8,20 +8,22 @@ describe SQLTree::Parser do
   
   context :from_clause do
     it "should parse a simple table" do
-      @parser.parse("FROM my_table", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table')])
+      @parser.parse("FROM my_table", :as => :from_clause).should == [SQLTree::Node::TableImport.new('my_table')]
     end
     
     it "should parse a simple table with implicit alias" do
-      @parser.parse("FROM my_table my_alias", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table', 'my_alias')])
+      @parser.parse("FROM my_table my_alias", :as => :from_clause).should == 
+          [SQLTree::Node::TableImport.new('my_table', 'my_alias')]
     end
 
     it "should parse a simple table with explicit alias" do
-      @parser.parse("FROM my_table AS my_alias", :as => :from_clause).should eql([SQLTree::Node::TableImport.new('my_table', 'my_alias')])
+      @parser.parse("FROM my_table AS my_alias", :as => :from_clause).should == 
+          [SQLTree::Node::TableImport.new('my_table', 'my_alias')]
     end
 
     it "should parse multiple tables separated by commas" do
-      @parser.parse("FROM my_table_1 AS a, my_table_2 AS b", :as => :from_clause).should eql(
-          [SQLTree::Node::TableImport.new('my_table_1', 'a'), SQLTree::Node::TableImport.new('my_table_2', 'b')])
+      @parser.parse("FROM my_table_1 AS a, my_table_2 AS b", :as => :from_clause).should ==
+          [SQLTree::Node::TableImport.new('my_table_1', 'a'), SQLTree::Node::TableImport.new('my_table_2', 'b')]
     end
     
   end
@@ -39,20 +41,19 @@ describe SQLTree::Parser do
   context :expressions do
   
     it "should parse a variable" do
-      @parser.parse("field", :as => :expression).should eql(SQLTree::Node[:field])
+      @parser.parse("field", :as => :expression).should === SQLTree::Node::Variable['field']
     end
 
     it "should parse a table field" do
-      @parser.parse('tbl.field', :as => :expression).should eql(SQLTree::Node::Field[:tbl, :field])
+      @parser.parse('tbl.field', :as => :expression).should == SQLTree::Node::Field['tbl.field']
     end
 
-  
     it "should parse a number" do
-      @parser.parse("1.0", :as => :expression).should eql(SQLTree::Node[1.0])
+      @parser.parse("1.0", :as => :expression).should == SQLTree::Node::Value['1.0']
     end
 
     it "should parse a string" do
-      @parser.parse("'str'", :as => :expression).should eql(SQLTree::Node['str'])
+      @parser.parse("'str'", :as => :expression).should == SQLTree::Node::Value["'str'"]
     end
 
     it "should parse a function call without arguments" do

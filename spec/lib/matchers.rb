@@ -6,7 +6,7 @@ class ParseAs
   
   def matches?(found_tree)
     @found_tree = found_tree.to_tree
-    return @found_tree.eql?(@expected_tree)
+    return @found_tree == @expected_tree
   end
   
   def description
@@ -34,7 +34,7 @@ class TokenizeTo
         when SQLTree::Token; t
         when String;  SQLTree::Token::String.new(t)
         when Integer; SQLTree::Token::Number.new(t)
-        when Float;   SQLTree::Token::Number.new(t)          
+        when Float;   SQLTree::Token::Number.new(t)
         when Symbol;  SQLTree::Token.const_get(t.to_s.upcase)
       end
     end
@@ -42,7 +42,7 @@ class TokenizeTo
   
   def matches?(found_tokens)
     @found_tokens = found_tokens
-    return @found_tokens.eql?(@expected_tokens)
+    return @found_tokens == @expected_tokens
   end
   
   def description

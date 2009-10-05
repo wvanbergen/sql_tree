@@ -4,9 +4,12 @@ class SQLTree::Parser
     
     attr_reader :expected_token, :actual_token
     
-    def initialize(expected_token, actual_token)
+    def initialize(actual_token, expected_token = nil)
       @expected_token, @actual_token = expected_token, actual_token
-      super("Unexpected token: #{expected_token.inspect} expected, but found #{actual_token.inspect}.")
+      message =  "Unexpected token: found #{actual_token.inspect}"
+      message << ", but expected #{expected_token.inspect}" if expected_token
+      message << '!'
+      super(message)
     end
   end
 
@@ -22,18 +25,20 @@ class SQLTree::Parser
     @current_token = @tokens.shift
   end
   
-  def consume(check)
-    raise UnexpectedToken.new(check, current_token) unless check == next_token
+  def consume(*checks)
+    checks.each do |check|
+      raise UnexpectedToken.new(check, current_token) unless check == next_token
+    end
   end
   
   def peek_token(distance = 1)
     @tokens[distance - 1]
   end
   
-  def error(token, check)
-    raise ParseError.new("Unexpected token: #{token.inspect} found, but #{check.inspect} expected.")
+  def peek_tokens(amount)
+    @tokens[0, amount]
   end
-  
+
   def debug
     p @tokens.inspect
   end
@@ -46,12 +51,12 @@ class SQLTree::Parser
       @tokens   = tokens
     end
     
-    send("parse_#{options[:as]}".to_sym)
+    send(:"parse_#{options[:as]}")
   end
   
   def parse_query
     case peek_token
-    when SQLTree::Token::SELECT; parse_select_query
+    when SQLTree::Token::SELECT then parse_select_query
     else raise "Could not parse query"
     end
   end
@@ -169,15 +174,15 @@ class SQLTree::Parser
     while peek_token == SQLTree::Token::COMMA
       consume(SQLTree::Token::COMMA)
       from_expressions << parse_from_expression
-    end 
+    end
 
-    return from_expressions    
+    return from_expressions
   end
   
   def parse_from_expression
     from_expression = case peek_token
-      when SQLTree::Token::Variable;  parse_table_import
-      else;                           error(peek_token)
+      when SQLTree::Token::Variable then  parse_table_import
+      else raise UnexpectedToken.new(peek_token)
     end
     return from_expression
   end
@@ -186,9 +191,39 @@ class SQLTree::Parser
     table_import = SQLTree::Node::TableImport.new(next_token.literal)
     if peek_token == SQLTree::Token::AS || SQLTree::Token::Variable === peek_token
       consume(SQLTree::Token::AS) if peek_token == SQLTree::Token::AS
-      table_import.variable = parse_variable_name.name
+      table_import.table_alias = parse_variable_name.name
     end
+    
+    while [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT, 
+            SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL, 
+            SQLTree::Token::FULL].include?(peek_token)
+      table_import.joins << parse_join
+    end
+
     return table_import
+  end
+  
+  def parse_join
+    join = SQLTree::Node::Join.new
+    
+    if peek_token == SQLTree::Token::FULL
+      join.join_type = :outer
+      consume(SQLTree::Token::FULL, SQLTree::Token::OUTER)
+    elsif [SQLTree::Token::OUTER, SQLTree::Token::INNER, SQLTree::Token::LEFT, SQLTree::Token::RIGHT].include?(peek_token)
+      join.join_type = next_token.literal.downcase.to_sym
+    end
+    
+    consume(SQLTree::Token::JOIN)
+    join.table = next_token.literal
+    if peek_token == SQLTree::Token::AS || SQLTree::Token::Variable === peek_token
+      consume(SQLTree::Token::AS) if peek_token == SQLTree::Token::AS
+      join.table_alias = next_token.literal
+    end
+    
+    consume(SQLTree::Token::ON)
+    join.join_expression = parse_expression
+    
+    return join
   end
   
   def parse_field
@@ -218,7 +253,12 @@ class SQLTree::Parser
   end
   
   def parse_value
-    SQLTree::Node::Value.new(next_token.literal)
+    case next_token
+    when SQLTree::Token::String, SQLTree::Token::Number
+      SQLTree::Node::Value.new(current_token.literal)
+    else
+      raise UnexpectedToken.new(current_token, :literal)
+    end
   end
 
     

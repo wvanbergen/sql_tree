@@ -30,7 +30,7 @@ class SQLTree::Tokenizer
       when '(';            yield(SQLTree::Token::LPAREN)
       when ')';            yield(SQLTree::Token::RPAREN)
       when '.';            yield(SQLTree::Token::DOT)
-      when ',';            yield(SQLTree::Token::COMMA)        
+      when ',';            yield(SQLTree::Token::COMMA)
       when /\d/;           tokenize_number(&block)
       when "'";            tokenize_quoted_string(&block)
       when OPERATOR_CHARS; tokenize_operator(&block)
@@ -40,11 +40,11 @@ class SQLTree::Tokenizer
     end
   end
   
-  alias :each :each_token  
+  alias :each :each_token
   
   def tokenize_literal(&block)
     literal = current_char
-    literal << next_char while /[\w]/ =~ peek_char    
+    literal << next_char while /[\w]/ =~ peek_char
       
     if SQLTree::Token::KEYWORDS.include?(literal.downcase)
       yield(SQLTree::Token.const_get(literal.upcase))
@@ -74,7 +74,7 @@ class SQLTree::Tokenizer
       string << (current_char == "\\" ? next_char : current_char)
     end
     yield(SQLTree::Token::String.new(string))
-  end  
+  end
   
   def tokenize_quoted_literal(&block)
     literal = ''
@@ -82,7 +82,7 @@ class SQLTree::Tokenizer
       literal << (current_char == "\\" ? next_char : current_char)
     end
     yield(SQLTree::Token::Variable.new(literal))     
-  end  
+  end
   
   
   def tokenize_operator(&block)

@@ -12,15 +12,8 @@ class SQLTree::Node
     "'#{str.gsub(/\'/, "''")}'"
   end
   
-  def self.[](arg, field = nil)
-    if field.nil?
-      case arg
-        when Symbol; Variable.new(arg.to_s)
-        else;        Value.new(arg) 
-      end
-    else
-      Field[arg, field]
-    end
+  def self.[](sql, options = {})
+    options[:as] = :"#{SQLTree.to_underscore(self.name.split('::').last)}"
+    SQLTree::Parser.parse(sql, options)
   end
-
 end
