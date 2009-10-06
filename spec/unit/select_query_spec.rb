@@ -1,20 +1,5 @@
 require "#{File.dirname(__FILE__)}/../spec_helper"
 
-describe SQLTree::Node::Value do
-  
-  it "should not parse a field name" do
-    lambda { SQLTree::Node::Value['field_name'] }.should raise_error(SQLTree::Parser::UnexpectedToken)
-  end
-  
-  it "should parse an integer value correctly" do
-    SQLTree::Node::Value['123'].value.should == 123
-  end
-  
-  it "should parse a string correctly" do
-    SQLTree::Node::Value["'123'"].value.should == '123'
-  end
-end
-
 describe SQLTree::Node::TableImport do
 
   it "should parse the table name correctly" do

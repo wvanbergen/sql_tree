@@ -27,16 +27,23 @@ module SQLTree::Node
     end
     
     def self.parse(tokens)
-      lhs = tokens.next
-      lhs = (lhs == SQLTree::Token::MULTIPLY) ? :all : lhs.literal
+      field_or_table = case tokens.next
+        when SQLTree::Token::MULTIPLY then :all
+        when SQLTree::Token::Variable then tokens.current.literal
+        else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+      end
 
       if tokens.peek == SQLTree::Token::DOT
+        table = field_or_table
         tokens.consume(SQLTree::Token::DOT)
-        rhs = tokens.next
-        rhs = (rhs == SQLTree::Token::MULTIPLY) ? :all : rhs.literal      
-        self.new(rhs, lhs)
+        field = case tokens.next
+          when SQLTree::Token::MULTIPLY then :all
+          when SQLTree::Token::Variable then tokens.current.literal
+          else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+        end
+        self.new(field, table)
       else
-        self.new(lhs)
+        self.new(field_or_table)
       end
     end
   end

@@ -1,7 +1,5 @@
 module SQLTree::Node
   
-  ALL_FIELDS = AllFieldsExpression.new
-  
   class SelectExpression < Base
     
     attr_accessor :expression, :variable
@@ -29,11 +27,19 @@ module SQLTree::Node
           expr.variable = SQLTree::Node::Variable.parse(tokens).name
         end
         return expr
-      end      
+      end
     end
     
     def ==(other)
       other.expression == self.expression && other.variable == self.variable
     end    
   end
+  
+  class AllFieldsExpression < Expression
+    def to_sql
+      '*'
+    end
+  end
+  
+  ALL_FIELDS = AllFieldsExpression.new
 end

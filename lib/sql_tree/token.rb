@@ -45,10 +45,10 @@ class SQLTree::Token
 
   LPAREN = Class.new(SQLTree::Token).new('(')
   RPAREN = Class.new(SQLTree::Token).new(')')
-  DOT    = Class.new(SQLTree::Token).new('.')  
-  COMMA  = Class.new(SQLTree::Token).new(',')    
+  DOT    = Class.new(SQLTree::Token).new('.')
+  COMMA  = Class.new(SQLTree::Token).new(',')
   
-  KEYWORDS = %w{select from where group having order distinct left right inner full outer natural join using and or not as on}
+  KEYWORDS = %w{select from where group having order distinct left right inner full outer natural join using and or not as on is null}
   KEYWORDS.each do |kw|
     self.const_set(kw.upcase, Class.new(SQLTree::Token::Keyword).new(kw.upcase))
   end
@@ -61,6 +61,6 @@ class SQLTree::Token
     self.const_set(symbol.to_s.upcase, Class.new(SQLTree::Token::Operator).new(literal)) unless self.const_defined?(symbol.to_s.upcase)
   end
   
-  LOGICAL_OPERATORS = [SQLTree::Token::EQ, SQLTree::Token::NE, SQLTree::Token::GT, SQLTree::Token::GTE, SQLTree::Token::LT, SQLTree::Token::LTE]
+  LOGICAL_OPERATORS = [SQLTree::Token::IS, SQLTree::Token::EQ, SQLTree::Token::NE, SQLTree::Token::GT, SQLTree::Token::GTE, SQLTree::Token::LT, SQLTree::Token::LTE]
 
 end

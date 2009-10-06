@@ -8,7 +8,11 @@ module SQLTree::Node
     end
   
     def to_sql
-      @value.kind_of?(String) ? quote_str(@value) : @value.to_s
+      case value
+      when nil    then 'NULL'
+      when String then quote_str(@value)
+      else             @value.to_s
+      end
     end
     
     def to_tree
@@ -16,13 +20,15 @@ module SQLTree::Node
     end
     
     def ==(other)
-      other.value == self.value
+      other.kind_of?(self.class) && other.value == self.value
     end
     
     def self.parse(tokens)
       case tokens.next
       when SQLTree::Token::String, SQLTree::Token::Number
         SQLTree::Node::Value.new(tokens.current.literal)
+      when SQLTree::Token::NULL
+        SQLTree::Node::Value.new(nil)
       else
         raise SQLTree::Parser::UnexpectedToken.new(tokens.current, :literal)
       end      

@@ -11,18 +11,49 @@ module SQLTree::Node
     end
     
     def self.parse_single(tokens)
-      if SQLTree::Token::LPAREN == tokens.peek
+      case tokens.peek
+      when SQLTree::Token::LPAREN
         tokens.consume(SQLTree::Token::LPAREN)
         expr = self.parse(tokens)
         tokens.consume(SQLTree::Token::RPAREN)
-        return expr
-      elsif SQLTree::Token::Variable === tokens.peek(1)  && tokens.peek(2) == SQLTree::Token::LPAREN
-        return SQLTree::Node::FunctionExpression.parse(tokens)  
-      elsif SQLTree::Token::Variable === tokens.peek
-        return SQLTree::Node::Variable.parse(tokens)
+        expr
+      when SQLTree::Token::NOT
+        SQLTree::Node::LogicalNotExpression.parse(tokens)
+      when SQLTree::Token::Variable
+        if tokens.peek(2) == SQLTree::Token::LPAREN
+          SQLTree::Node::FunctionExpression.parse(tokens)
+        else
+          SQLTree::Node::Variable.parse(tokens)
+        end
       else
-        return SQLTree::Node::Value.parse(tokens)
-      end      
+        SQLTree::Node::Value.parse(tokens)
+      end
+    end
+  end
+  
+  class LogicalNotExpression < Expression
+    
+    attr_accessor :expression
+    
+    def initialize(expression)
+      @expression = expression
+    end
+    
+    def to_sql
+      "NOT(#{@expression.to_sql})"
+    end
+    
+    def to_tree
+      [:not, expression.to_tree]
+    end
+    
+    def ==(other)
+      other.kind_of?(self.class) && other.expression == self.expression
+    end
+    
+    def self.parse(tokens)
+      tokens.consume(SQLTree::Token::NOT)
+      self.new(SQLTree::Node::Expression.parse(tokens))
     end
   end
 
@@ -42,12 +73,16 @@ module SQLTree::Node
       [@operator] + @expressions.map { |e| e.to_tree }
     end
     
+    def ==(other)
+      self.operator == other.operator && self.expressions == other.expressions
+    end
+    
     def self.parse(tokens)
       expr = ComparisonExpression.parse(tokens)
       while [SQLTree::Token::AND, SQLTree::Token::OR].include?(tokens.peek)
         expr = SQLTree::Node::LogicalExpression.new(tokens.next.literal, [expr, ComparisonExpression.parse(tokens)])
       end 
-      return expr      
+      return expr
     end
   end
 
@@ -69,11 +104,16 @@ module SQLTree::Node
     end
     
     def self.parse(tokens)
-      expr = SQLTree::Node::ArithmeticExpression.parse(tokens)
+      lhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
       while SQLTree::Token::LOGICAL_OPERATORS.include?(tokens.peek)
-        expr = self.new(tokens.next.literal, expr, SQLTree::Node::ArithmeticExpression.parse(tokens))
+        comparison_operator = tokens.next
+        if SQLTree::Token::IS === comparison_operator
+
+        end
+        rhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
+        lhs = self.new(comparison_operator.literal, lhs, rhs)
       end
-      return expr      
+      return lhs
     end
   end
   
