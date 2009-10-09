@@ -15,10 +15,6 @@ module SQLTree::Node
       end
     end
     
-    def to_tree
-      @value
-    end
-    
     def ==(other)
       other.kind_of?(self.class) && other.value == self.value
     end

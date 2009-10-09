@@ -49,10 +49,6 @@ module SQLTree::Node
       "NOT(#{@expression.to_sql})"
     end
     
-    def to_tree
-      [:not, expression.to_tree]
-    end
-    
     def ==(other)
       other.kind_of?(self.class) && other.expression == self.expression
     end
@@ -75,10 +71,6 @@ module SQLTree::Node
       "(" + @expressions.map { |e| e.to_sql }.join(" #{@operator.to_s.upcase} ") + ")"
     end
 
-    def to_tree
-      [@operator] + @expressions.map { |e| e.to_tree }
-    end
-    
     def ==(other)
       self.operator == other.operator && self.expressions == other.expressions
     end
@@ -103,10 +95,6 @@ module SQLTree::Node
     
     def to_sql
       "(#{@lhs.to_sql} #{@operator} #{@rhs.to_sql})"
-    end
-    
-    def to_tree
-      [SQLTree::Token::OPERATORS_HASH[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
     def self.parse_comparison_operator(tokens)
@@ -151,10 +139,6 @@ module SQLTree::Node
       @items = items
     end
 
-    def to_tree
-      items.map { |i| i.to_tree }
-    end
-    
     def to_sql
       "(#{items.map {|i| i.to_sql}.join(', ')})"
     end
@@ -184,10 +168,6 @@ module SQLTree::Node
       "#{@function}(" + @arguments.map { |e| e.to_sql }.join(', ') + ")"
     end
     
-    def to_tree
-      [@function.to_sym] + @arguments.map { |e| e.to_tree }
-    end
-    
     def self.parse(tokens)
       expr = self.new(tokens.next.literal)
       tokens.consume(SQLTree::Token::LPAREN)
@@ -211,10 +191,6 @@ module SQLTree::Node
     
     def to_sql
       "(#{@lhs.to_sql} #{@operator} #{@rhs.to_sql})"
-    end
-    
-    def to_tree
-      [SQLTree::Token::OPERATORS_HASH[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
     def self.parse(tokens)

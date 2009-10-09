@@ -17,10 +17,6 @@ module SQLTree::Node
     def to_sql
       @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
     end
-
-    def to_tree
-      to_sql.to_sym
-    end
     
     def ==(other)
       other.name == self.name && other.table == self.table

@@ -12,10 +12,6 @@ module SQLTree::Node
       quote_var(@name)
     end
     
-    def to_tree
-      @name.to_sym
-    end
-    
     def ==(other)
       other.name == self.name
     end
