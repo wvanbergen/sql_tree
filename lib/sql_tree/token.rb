@@ -30,6 +30,12 @@ class SQLTree::Token
     literal
   end
   
+  def join?
+    [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT, 
+      SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL, 
+      SQLTree::Token::FULL].include?(self)
+  end
+  
   ###################################################################
   # DYNAMIC TOKEN TYPES
   ###################################################################
