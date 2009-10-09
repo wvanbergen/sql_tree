@@ -10,23 +10,23 @@ module SQLTree::Node
     def inspect
       "#{self.class.name}[#{self.to_sql}]"
     end
-  
-    # Quotes a variable name so that it can be safely used within 
+
+    # Quotes a variable name so that it can be safely used within
     # SQL queries.
     def quote_var(name)
       "\"#{name}\""
     end
-  
+
     # Quotes a string so that it can be used within an SQL query.
     def quote_str(str)
       "'#{str.gsub(/\'/, "''")}'"
     end
-  
+
     # This method should be implemented by a subclass.
     def self.parse(tokens)
       raise 'Only implemented in subclasses!'
     end
-  
+
     # Parses a string, expecting it to be parsable to an instance of
     # the current class.
     def self.[](sql, options = {})

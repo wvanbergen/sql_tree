@@ -15,7 +15,7 @@ module SQLTree::Node
       join_sql
     end
 
-    def table 
+    def table
       table_reference.table
     end
 
@@ -43,7 +43,7 @@ module SQLTree::Node
     end
 
     def ==(other)
-      other.table = self.table && other.table_alias == self.table_alias && 
+      other.table = self.table && other.table_alias == self.table_alias &&
         other.join_type == self.join_type && other.join_expression == self.join_expression
     end
   end

@@ -11,17 +11,17 @@
 # the <tt>each_token</tt> (aliased to <tt>each</tt>) will yield every
 # token one by one.
 class SQLTree::Tokenizer
-  
+
   include Enumerable
-  
+
   # The keyword queue, on which kywords are placed before they are yielded
   # to the parser, to enable keyword combining (e.g. NOT LIKE)
   attr_reader :keyword_queue
-  
+
   def initialize # :nodoc:
     @keyword_queue = []
   end
-  
+
   # Returns an array of tokens for the given string.
   # <tt>string</tt>:: the string to tokenize
   def tokenize(string)
@@ -29,7 +29,7 @@ class SQLTree::Tokenizer
     @current_char_pos = -1
     self.entries
   end
-  
+
   # Returns the current character that is being tokenized
   def current_char
     @current_char
@@ -51,7 +51,7 @@ class SQLTree::Tokenizer
 
   # Combines several tokens to a single token if possible, and
   # yields teh result, or yields every single token if they cannot
-  # be combined. 
+  # be combined.
   # <tt>token</tt>:: the token to yield or combine
   # <tt>block</tt>:: the block to yield tokens and combined tokens to.
   def handle_token(token, &block) # :yields: SQLTree::Token
@@ -62,7 +62,7 @@ class SQLTree::Tokenizer
       block.call(token)
     end
   end
-  
+
   # This method ensures that every keyword currently in the queue is
   # yielded. This method get called by <tt>handle_token</tt> when it
   # knows for sure that the keywords on the queue cannot be combined
@@ -73,10 +73,10 @@ class SQLTree::Tokenizer
   end
 
   # Iterator method that yields each token that is encountered in the
-  # SQL stream. These tokens are passed to the SQL parser to construct 
+  # SQL stream. These tokens are passed to the SQL parser to construct
   # a syntax tree for the SQL query.
   #
-  # This method is aliased to <tt>:each</tt> to make the Enumerable 
+  # This method is aliased to <tt>:each</tt> to make the Enumerable
   # methods work on this method.
   def each_token(&block) # :yields: SQLTree::Token
     while next_char
@@ -93,13 +93,13 @@ class SQLTree::Tokenizer
       when '"';            tokenize_quoted_variable(&block)     # TODO: allow MySQL quoting mode
       end
     end
-    
+
     # Make sure to yield any tokens that are still stashed on the queue.
     empty_keyword_queue!(&block)
   end
-  
+
   alias :each :each_token
-  
+
   # Tokenizes a eyword in the code. This can either be a reserved SQL keyword
   # or a variable. This method will yield variables directly. Keywords will be
   # yielded with a delay, because they may need to be combined with other
@@ -107,7 +107,7 @@ class SQLTree::Tokenizer
   def tokenize_keyword(&block) # :yields: SQLTree::Token
     literal = current_char
     literal << next_char while /[\w]/ =~ peek_char
-      
+
     if SQLTree::Token::KEYWORDS.include?(literal.upcase)
       handle_token(SQLTree::Token.const_get(literal.upcase), &block)
     else
@@ -125,7 +125,7 @@ class SQLTree::Tokenizer
       dot_encountered = true if peek_char == '.'
       number << next_char
     end
-    
+
     if dot_encountered
       handle_token(SQLTree::Token::Number.new(number.to_f), &block)
     else
@@ -160,7 +160,7 @@ class SQLTree::Tokenizer
   # A regular expression that matches all operator characters.
   OPERATOR_CHARS = /\=|<|>|!|\-|\+|\/|\*|\%/
 
-  # Tokenizes an operator in the SQL stream. This method will yield the 
+  # Tokenizes an operator in the SQL stream. This method will yield the
   # operator token when the last character of the token is encountered.
   def tokenize_operator(&block) # :yields: SQLTree::Token
     operator = current_char

@@ -1,5 +1,5 @@
 module SQLTree::Node
-  
+
   class Field < Base
 
     attr_accessor :name, :table
@@ -20,11 +20,11 @@ module SQLTree::Node
     def to_sql
       @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
     end
-    
+
     def ==(other)
       other.name == self.name && other.table == self.table
     end
-    
+
     def self.parse(tokens)
       field_or_table = case tokens.next
         when SQLTree::Token::MULTIPLY then :all

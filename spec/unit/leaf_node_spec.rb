@@ -1,7 +1,7 @@
 require "#{File.dirname(__FILE__)}/../spec_helper"
 
 describe SQLTree::Node::Value do
-  
+
   describe '.parse' do
     it "should not parse a field name" do
       lambda { SQLTree::Node::Value['field_name'] }.should raise_error(SQLTree::Parser::UnexpectedToken)
@@ -14,11 +14,11 @@ describe SQLTree::Node::Value do
     it "should parse a string correctly" do
       SQLTree::Node::Value["'123'"].value.should == '123'
     end
-    
+
     it "should parse a NULL value correctly" do
       SQLTree::Node::Value['NULL'].value.should == nil
     end
-    
+
   end
 end
 

@@ -8,60 +8,60 @@ class SQLTree::Token
 
   # For some tokens, the encountered literal value is important
   # during the parsing phase (e.g. strings and variable names).
-  # Therefore, the literal value encountered that represented the 
+  # Therefore, the literal value encountered that represented the
   # token in the original SQL query string is stored.
   attr_accessor :literal
 
   # Creates a token instance with a given literal representation.
   #
-  # <tt>literal<tt>:: The literal string value that was encountered 
+  # <tt>literal<tt>:: The literal string value that was encountered
   #                   while tokenizing.
   def initialize(literal)
     @literal = literal
   end
-  
+
   # Compares two tokens. Tokens are considered equal when they are
   # instances of the same class, i.e. do literal is not used.
   def ==(other)
     other.class == self.class
   end
-  
+
   def inspect # :nodoc:
     literal
   end
-  
+
   def join?
-    [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT, 
-      SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL, 
+    [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT,
+      SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL,
       SQLTree::Token::FULL].include?(self)
   end
-  
+
   def direction?
     [SQLTree::Token::ASC, SQLTree::Token::DESC].include?(self)
   end
-  
+
   ###################################################################
   # DYNAMIC TOKEN TYPES
   ###################################################################
 
   # The <tt>SQLTree::Token::Value</tt> class is the base class for
-  # every dynamic token. A dynamic token is a token for which the 
+  # every dynamic token. A dynamic token is a token for which the
   # literal value used remains impoirtant during parsing.
   class Value < SQLTree::Token
-    
+
     def inspect # :nodoc:
       "#<#{self.class.name.split('::').last}:#{literal.inspect}>"
     end
-    
-    # Compares two tokens. For values, the literal encountered value 
+
+    # Compares two tokens. For values, the literal encountered value
     # of the token is also taken into account besides the class.
     def ==(other)
       other.class == self.class && @literal == other.literal
     end
   end
-  
+
   # The <tt>SQLTree::Token::Variable</tt> class represents SQL
-  # variables. The variable name is stored in the literal as string, 
+  # variables. The variable name is stored in the literal as string,
   # without quotes if they were present.
   class Variable < SQLTree::Token::Value
   end
@@ -76,7 +76,7 @@ class SQLTree::Token
   # literal.
   class Number < SQLTree::Token::Value
   end
-  
+
   ###################################################################
   # STATIC TOKEN TYPES
   ###################################################################
@@ -111,7 +111,7 @@ class SQLTree::Token
   COMMA  = Class.new(SQLTree::Token).new(',')
 
   # A list of all the SQL reserverd keywords.
-  KEYWORDS = %w{SELECT FROM WHERE GROUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING 
+  KEYWORDS = %w{SELECT FROM WHERE GROUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING
                 AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC}
 
   # Create a token for all the reserved keywords in SQL
@@ -129,7 +129,7 @@ class SQLTree::Token
   OPERATORS_HASH.each_pair do |literal, symbol|
     self.const_set(symbol.to_s.upcase, Class.new(SQLTree::Token::Operator).new(literal)) unless self.const_defined?(symbol.to_s.upcase)
   end
-  
+
   COMPARISON_OPERATORS = COMPARISON_OPERATORS_HASH.map { |(literal, symbol)| const_get(symbol.to_s.upcase) } +
     [SQLTree::Token::IN, SQLTree::Token::IS, SQLTree::Token::BETWEEN, SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::NOT]
 end

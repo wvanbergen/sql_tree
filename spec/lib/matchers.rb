@@ -1,5 +1,5 @@
 class TokenizeTo
-  
+
   def initialize(expected_tokens)
     @expected_tokens = expected_tokens.map do |t|
       case t
@@ -11,24 +11,24 @@ class TokenizeTo
       end
     end
   end
-  
+
   def matches?(found_tokens)
     @found_tokens = found_tokens
     return @found_tokens == @expected_tokens
   end
-  
+
   def description
     "expected to tokenized to #{@expected_tokens.inspect}"
   end
-  
+
   def failure_message
     " #{@expected_tokens.inspect} expected, but found #{@found_tokens.inspect}"
   end
-  
+
   def negative_failure_message
     " expected not to be tokenized to #{@expected_tokens.inspect}"
-  end  
-  
+  end
+
 end
 
 def tokenize_to(*expected_tokens)

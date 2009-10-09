@@ -1,5 +1,5 @@
 module SQLTree::Node
-  
+
   class Variable < Base
 
     attr_accessor :name
@@ -7,11 +7,11 @@ module SQLTree::Node
     def initialize(name)
       @name = name
     end
-  
+
     def to_sql
       quote_var(@name)
     end
-    
+
     def ==(other)
       other.name == self.name
     end

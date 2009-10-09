@@ -17,7 +17,7 @@ module SQLTree::Node
     def ==(other)
       other.table = self.table && other.table_alias == self.table_alias
     end
-    
+
     def self.parse(tokens)
       if SQLTree::Token::Variable === tokens.next
         table_reference = self.new(tokens.current.literal)
@@ -26,7 +26,7 @@ module SQLTree::Node
           table_reference.table_alias = SQLTree::Node::Variable.parse(tokens).name
         end
         return table_reference
-      else 
+      else
         raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
       end
     end

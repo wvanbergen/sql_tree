@@ -11,16 +11,16 @@ module SQLTree::Spec
       SQLTree::Node.const_get(const)
     end
   end
-  
+
   module TokenLoader
     def self.const_missing(const)
       SQLTree::Token.const_get(const)
     end
-  end  
+  end
 end
 
 Spec::Runner.configure do |config|
-  
+
 end
 
 require "#{File.dirname(__FILE__)}/lib/matchers"
