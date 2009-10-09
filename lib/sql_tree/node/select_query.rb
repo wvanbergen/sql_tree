@@ -1,24 +1,26 @@
 module SQLTree::Node
-  
+
   class SelectQuery < Base
-  
+
     attr_accessor :distinct, :select, :from, :where, :group_by, :having, :order_by, :limit
-  
+
     def initialize
       @distinct = false
       @select   = []
     end
-  
+
     def to_sql
       raise "At least one SELECT expression is required" if self.select.empty?
       sql = (self.distinct) ? "SELECT DISTINCT " : "SELECT "
       sql << select.map { |s| s.to_sql }.join(', ')
-      sql << " FROM " << from.map { |f| f.to_sql }.join(', ')
-      sql << " WHERE " << where.to_sql       if where
+      sql << " FROM "     << from.map { |f| f.to_sql }.join(', ')
+      sql << " WHERE "    << where.to_sql if where
+      sql << " GROUP BY " << group_by.map { |g| g.to_sql }.join(', ') if group_by
       sql << " ORDER BY " << order_by.map { |o| o.to_sql }.join(', ') if order_by
+      sql << " HAVING "   << having.to_sql if having
       return sql
     end
-  
+
     # Uses the provided initialized parser to parse a SELECT query.
     def self.parse(tokens)
       select_node = self.new
@@ -32,10 +34,14 @@ module SQLTree::Node
       select_node.select   = self.parse_select_clause(tokens)
       select_node.from     = self.parse_from_clause(tokens)   if tokens.peek == SQLTree::Token::FROM
       select_node.where    = self.parse_where_clause(tokens)  if tokens.peek == SQLTree::Token::WHERE
+      if tokens.peek == SQLTree::Token::GROUP
+        select_node.group_by = self.parse_group_clause(tokens)
+        select_node.having   = self.parse_having_clause(tokens) if tokens.peek == SQLTree::Token::HAVING
+      end
       select_node.order_by = self.parse_order_clause(tokens)  if tokens.peek == SQLTree::Token::ORDER
       return select_node
     end
-    
+
     def self.parse_select_clause(tokens)
       expressions = [SQLTree::Node::SelectExpression.parse(tokens)]
       while tokens.peek == SQLTree::Token::COMMA
@@ -44,7 +50,7 @@ module SQLTree::Node
       end
       return expressions
     end
-    
+
     def self.parse_from_clause(tokens)
       tokens.consume(SQLTree::Token::FROM)
       sources = [SQLTree::Node::Source.parse(tokens)]
@@ -54,20 +60,28 @@ module SQLTree::Node
       end
       return sources
     end
-    
+
     def self.parse_where_clause(tokens)
       tokens.consume(SQLTree::Token::WHERE)
       Expression.parse(tokens)
     end
 
     def self.parse_group_clause(tokens)
-      # TODO: implement me
+      tokens.consume(SQLTree::Token::GROUP)
+      tokens.consume(SQLTree::Token::BY)
+      exprs = [SQLTree::Node::Expression.parse(tokens)]
+      while tokens.peek == SQLTree::Token::COMMA
+        tokens.consume(SQLTree::Token::COMMA)
+        exprs << SQLTree::Node::Expression.parse(tokens)
+      end
+      return exprs
     end
 
     def self.parse_having_clause(tokens)
-      # TODO: implement me
+      tokens.consume(SQLTree::Token::HAVING)
+      SQLTree::Node::Expression.parse(tokens)
     end
-    
+
     def self.parse_order_clause(tokens)
       tokens.consume(SQLTree::Token::ORDER)
       tokens.consume(SQLTree::Token::BY)
