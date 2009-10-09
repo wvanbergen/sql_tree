@@ -16,6 +16,17 @@ are supported.
 The SQLTree library is distributed as a gem on Gemcutter.org. To install:
 
   gem install sql_tree --source http://gemcutter.org
+  
+== Usage
+
+Consider the following example:
+
+  require 'sql_tree'
+  tree  = SQLTree["SELECT * FROM table WHERE field = 'value'"]
+  where = SQLTree::Node::Expression["username = 'user' AND password = MD5('$secret')"]
+  tree.where = where # replace WHERE expression
+  puts tree.to_sql
+  # "SELECT * FROM "table" WHERE (("username" = 'user') AND ("password" = MD5('$secret')))"
 
 == Additional information
 
