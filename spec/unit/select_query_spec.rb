@@ -1,26 +1,26 @@
 require "#{File.dirname(__FILE__)}/../spec_helper"
 
-describe SQLTree::Node::TableImport do
+describe SQLTree::Node::Source do
 
   it "should parse the table name correctly" do
-    SQLTree::Node::TableImport['table AS a'].table.should == 'table'
+    SQLTree::Node::Source['table AS a'].table.should == 'table'
   end
 
   it "should parse the alias correctly when using the AS keyword" do
-    SQLTree::Node::TableImport['table AS a'].table_alias.should == 'a'
+    SQLTree::Node::Source['table AS a'].table_alias.should == 'a'
   end
 
   it "should not require the AS keyword for a table alias" do
-    SQLTree::Node::TableImport['table AS a'].should == SQLTree::Node::TableImport['table a']
+    SQLTree::Node::Source['table AS a'].should == SQLTree::Node::Source['table a']
   end
-  
+
   it "should parse a table name without alias" do
-    SQLTree::Node::TableImport['table'].table.should == "table"
-    SQLTree::Node::TableImport['table'].table_alias.should be_nil
+    SQLTree::Node::Source['table'].table.should == "table"
+    SQLTree::Node::Source['table'].table_alias.should be_nil
   end
-  
+
   it "should have no joins" do
-    SQLTree::Node::TableImport['table'].joins.should be_empty
+    SQLTree::Node::Source['table'].joins.should be_empty
   end
 end
 

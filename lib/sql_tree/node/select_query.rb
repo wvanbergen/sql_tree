@@ -46,30 +46,33 @@ module SQLTree::Node
     
     def self.parse_from_clause(tokens)
       tokens.consume(SQLTree::Token::FROM)
-      from_expressions = [SQLTree::Node::TableImport.parse(tokens)]
+      sources = [SQLTree::Node::Source.parse(tokens)]
       while tokens.peek == SQLTree::Token::COMMA
         tokens.consume(SQLTree::Token::COMMA)
-        from_expressions << SQLTree::Node::TableImport.parse(tokens)
+        sources << SQLTree::Node::Source.parse(tokens)
       end
-
-      return from_expressions      
+      return sources
     end
     
     def self.parse_where_clause(tokens)
       tokens.consume(SQLTree::Token::WHERE)
       Expression.parse(tokens)
     end
-    
+
     def self.parse_group_clause(tokens)
+      # TODO: implement me
     end
-    
+
     def self.parse_having_clause(tokens)
+      # TODO: implement me
     end
     
     def self.parse_order_clause(tokens)
+      # TODO: implement me
     end
-    
+
     def self.parse_limit_clause(tokens)
+      # TODO: implement me
     end
   end
 end

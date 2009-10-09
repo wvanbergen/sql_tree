@@ -1,6 +1,6 @@
 module SQLTree::Node
   
-  class TableImport < Base
+  class Source < Base
     
     attr_accessor :table_reference, :joins
     
@@ -27,11 +27,11 @@ module SQLTree::Node
     end
 
     def self.parse(tokens)
-      table_import = self.new(SQLTree::Node::TableReference.parse(tokens))
+      source = self.new(SQLTree::Node::TableReference.parse(tokens))
       while tokens.peek && tokens.peek.join?
-        table_import.joins << Join.parse(tokens)
+        source.joins << Join.parse(tokens)
       end
-      return table_import
+      return source
     end
   end 
 end
