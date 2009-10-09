@@ -2,6 +2,10 @@ require "#{File.dirname(__FILE__)}/../spec_helper"
 
 describe SQLTree, 'parsing and generating SQL' do
 
+  it "should parse an generate q query without FROM" do
+    SQLTree['SELECT 1'].to_sql.should == 'SELECT 1'
+  end
+
   it "should parse and generate SQL fo a simple list query" do
     SQLTree["SELECT * FROM table"].to_sql.should == 'SELECT * FROM "table"'
   end

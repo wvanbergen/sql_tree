@@ -1,5 +1,29 @@
 require "#{File.dirname(__FILE__)}/../spec_helper"
 
+describe SQLTree::Node::SelectQuery do
+  
+  it "should parse a query without FROM, WHERE, ORDER, GROUP or HAVING clause" do
+    tree = SQLTree::Node::SelectQuery['SELECT 1']
+    tree.select.first.expression.value.should == 1
+    tree.from.should     be_nil
+    tree.where.should    be_nil
+    tree.group_by.should be_nil
+    tree.having.should   be_nil
+    tree.order_by.should be_nil
+  end
+  
+  it "should parse a query with all clauses" do
+    tree = SQLTree::Node::SelectQuery['SELECT 1 AS static, field FROM table1 AS t1, table2 LEFT JOIN table3 t3 ON (t1.id = t2.id)
+              WHERE t1.field = 1234 GROUP BY t2.group_field HAVING SUM(t2.group_field) > 100 ORDER BY t.timestamp DESC']
+
+    tree.select.length.should == 2
+    tree.from.length.should   == 2
+    tree.where.should be_kind_of(SQLTree::Node::ComparisonExpression)
+    tree.group_by.first.should be_kind_of(SQLTree::Node::Field)
+    tree.having.should be_kind_of(SQLTree::Node::ComparisonExpression)
+  end
+end
+
 describe SQLTree::Node::Source do
 
   it "should parse the table name correctly" do
