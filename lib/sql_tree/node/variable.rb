@@ -13,7 +13,7 @@ module SQLTree::Node
     end
 
     def ==(other)
-      other.name == self.name
+      other.class == self.class && other.name == self.name
     end
 
     def self.parse(tokens)

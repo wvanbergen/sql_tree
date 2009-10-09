@@ -38,4 +38,14 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree['SELECT SUM( field1 ) FROM  t  GROUP BY  field1,  MD5( field2 ) HAVING  SUM( field1 ) > 10'].to_sql.should ==
             'SELECT SUM("field1") FROM "t" GROUP BY "field1", MD5("field2") HAVING (SUM("field1") > 10)'
   end
+  
+  it "should parse and generate an INSERT query with field list" do
+    SQLTree['INSERT INTO  table  ( field1,   field2)  VALUES (1, 2)'].to_sql.should ==
+            'INSERT INTO "table" ("field1", "field2") VALUES (1, 2)'
+  end
+
+  it "should parse and generate an INSERT query without field list" do
+    SQLTree['INSERT INTO  table  VALUES (1, 2)'].to_sql.should ==
+            'INSERT INTO "table" VALUES (1, 2)'
+  end
 end
