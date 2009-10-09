@@ -48,4 +48,14 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree['INSERT INTO  table  VALUES (1, 2)'].to_sql.should ==
             'INSERT INTO "table" VALUES (1, 2)'
   end
+  
+  it "should parse and generate an DELETE query without WHERE clause" do
+    SQLTree['DELETE FROM  table'].to_sql.should ==
+            'DELETE FROM "table"'
+  end
+  
+  it "should parse and generate an DELETE query with WHERE clause" do
+    SQLTree['DELETE FROM  table  WHERE  1 = 1'].to_sql.should ==
+            'DELETE FROM "table" WHERE (1 = 1)'
+  end
 end

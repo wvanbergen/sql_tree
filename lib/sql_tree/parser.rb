@@ -57,7 +57,8 @@ class SQLTree::Parser
   def parse!
     case self.peek
     when SQLTree::Token::SELECT then SQLTree::Node::SelectQuery.parse(self)
-    when SQLTree::Token::INSERT then SQLTree::Node::InsertQuery.parse(self)      
+    when SQLTree::Token::INSERT then SQLTree::Node::InsertQuery.parse(self)
+    when SQLTree::Token::DELETE then SQLTree::Node::DeleteQuery.parse(self)
     else raise UnexpectedToken.new(self.peek)
     end
   end
