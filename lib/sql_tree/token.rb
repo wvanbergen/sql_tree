@@ -127,6 +127,5 @@ class SQLTree::Token
   end
   
   COMPARISON_OPERATORS = COMPARISON_OPERATORS_HASH.map { |(literal, symbol)| const_get(symbol.to_s.upcase) } +
-      [SQLTree::Token::IS, SQLTree::Token::IS_NOT, SQLTree::Token::LIKE, SQLTree::Token::NOT_LIKE,
-       SQLTree::Token::ILIKE, SQLTree::Token::NOT_ILIKE]
+    [SQLTree::Token::IS, SQLTree::Token::BETWEEN, SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::NOT]
 end

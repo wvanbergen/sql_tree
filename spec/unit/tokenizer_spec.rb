@@ -64,11 +64,13 @@ describe SQLTree::Tokenizer do
     end
   end
   
-  context "combining double keywords" do
-    it "should tokenize double keywords" do
-      @tokenizer.tokenize('ORDER BY').should tokenize_to(:order_by)
-    end
-  end
+  # # Combined tokens are disabled for now; 
+  # # Combination is currently done in the parsing phase.
+  # context "combining double keywords" do
+  #   it "should tokenize double keywords" do
+  #     @tokenizer.tokenize('NOT LIKE').should tokenize_to(:not_like)
+  #   end
+  # end
   
   context "when tokenizing full queries or query fragments" do
     it "should tokenize a full SQL query" do

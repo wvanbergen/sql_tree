@@ -109,15 +109,33 @@ module SQLTree::Node
       [SQLTree::Token::OPERATORS_HASH[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
+    def self.parse_comparison_operator(tokens)
+      operator_token = tokens.next
+      if SQLTree::Token::IS === operator_token
+        if SQLTree::Token::NOT === tokens.peek
+          tokens.consume(SQLTree::Token::NOT)
+          'IS NOT'
+        else
+          'IS'
+        end
+      elsif SQLTree::Token::NOT === operator_token
+        case tokens.peek
+        when SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::BETWEEN
+          "NOT #{tokens.next.literal.upcase}"
+        else
+          raise SQLTree::Parser::UnexpectedToken.new(tokens.peek)
+        end
+      else
+        operator_token.literal
+      end
+    end
+    
     def self.parse(tokens)
       lhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
       while SQLTree::Token::COMPARISON_OPERATORS.include?(tokens.peek)
-        comparison_operator = tokens.next
-        if SQLTree::Token::IS === comparison_operator
-
-        end
+        comparison_operator = parse_comparison_operator(tokens)
         rhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
-        lhs = self.new(comparison_operator.literal, lhs, rhs)
+        lhs = self.new(comparison_operator, lhs, rhs)
       end
       return lhs
     end

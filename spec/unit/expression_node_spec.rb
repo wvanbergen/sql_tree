@@ -62,5 +62,26 @@ describe SQLTree::Node::Expression do
       comparison.lhs.should == SQLTree::Node::Variable.new('field')
       comparison.rhs.should == SQLTree::Node::Value.new(nil)
     end
+    
+    it "should parse an IS NOT NULL expression corectly" do
+      comparison = SQLTree::Node::Expression['field IS NOT NULL']
+      comparison.operator.should == 'IS NOT'
+      comparison.lhs.should == SQLTree::Node::Variable.new('field')
+      comparison.rhs.should == SQLTree::Node::Value.new(nil)
+    end
+    
+    it "should parse a LIKE expression corectly" do
+      comparison = SQLTree::Node::Expression["field LIKE '%search%"]
+      comparison.operator.should == 'LIKE'
+      comparison.lhs.should == SQLTree::Node::Variable.new('field')
+      comparison.rhs.should == SQLTree::Node::Value.new('%search%')
+    end
+
+    it "should parse a NOT ILIKE expression corectly" do
+      comparison = SQLTree::Node::Expression["field NOT ILIKE '%search%"]
+      comparison.operator.should == 'NOT ILIKE'
+      comparison.lhs.should == SQLTree::Node::Variable.new('field')
+      comparison.rhs.should == SQLTree::Node::Value.new('%search%')
+    end
   end
 end
