@@ -59,6 +59,7 @@ class SQLTree::Parser
     when SQLTree::Token::SELECT then SQLTree::Node::SelectQuery.parse(self)
     when SQLTree::Token::INSERT then SQLTree::Node::InsertQuery.parse(self)
     when SQLTree::Token::DELETE then SQLTree::Node::DeleteQuery.parse(self)
+    when SQLTree::Token::UPDATE then SQLTree::Node::UpdateQuery.parse(self)
     else raise UnexpectedToken.new(self.peek)
     end
   end

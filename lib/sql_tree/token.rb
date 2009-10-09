@@ -112,7 +112,7 @@ class SQLTree::Token
 
   # A list of all the SQL reserverd keywords.
   KEYWORDS = %w{SELECT FROM WHERE GROUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING
-                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC INSERT INTO VALUES DELETE}
+                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC INSERT INTO VALUES DELETE UPDATE SET}
 
   # Create a token for all the reserved keywords in SQL
   KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword).new(kw)) }

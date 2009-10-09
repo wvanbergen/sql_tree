@@ -2,15 +2,15 @@ module SQLTree::Node
 
   class DeleteQuery < Base
 
-    attr_accessor :table, :expression
+    attr_accessor :table, :where
 
-    def initialize(table, expression = nil)
-      @table, @expression = table, expression
+    def initialize(table, where = nil)
+      @table, @where = table, where
     end
 
     def to_sql
       sql = "DELETE FROM #{self.quote_var(table)}"
-      sql << " WHERE #{expression.to_sql}" if self.expression
+      sql << " WHERE #{where.to_sql}" if self.where
       sql
     end
     
@@ -20,7 +20,7 @@ module SQLTree::Node
       delete_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
       if tokens.peek == SQLTree::Token::WHERE
         tokens.consume(SQLTree::Token::WHERE)
-        delete_query.expression = SQLTree::Node::Expression.parse(tokens)
+        delete_query.where = SQLTree::Node::Expression.parse(tokens)
       end
       return delete_query
     end

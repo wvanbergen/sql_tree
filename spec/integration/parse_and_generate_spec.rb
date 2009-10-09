@@ -62,4 +62,14 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree['DELETE FROM  table  WHERE  1 = 1'].to_sql.should ==
             'DELETE FROM "table" WHERE (1 = 1)'
   end
+  
+  it "should parse and generate an UPDATE query without WHERE clause" do
+    SQLTree['UPDATE  table  SET  field1  = 1,  field2  = 2'].to_sql.should ==
+            'UPDATE "table" SET "field1" = 1, "field2" = 2'
+  end
+
+  it "should parse and generate an UPDATE query with WHERE clause" do
+    SQLTree['UPDATE  table  SET  field1  = 123 WHERE   id  = 17'].to_sql.should ==
+            'UPDATE "table" SET "field1" = 123 WHERE ("id" = 17)'
+  end
 end
