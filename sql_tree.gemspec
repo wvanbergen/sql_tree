@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
 
   # Do not modify the version and date values by hand, because this will
   # automatically by them gem release script.
-  s.version = "0.0.2"
+  s.version = "0.0.3"
   s.date    = "2009-10-09"
 
   s.summary = "A pure Ruby library to represent SQL queries with a syntax tree for inspection and modification."
