@@ -29,7 +29,7 @@ module SQLTree::Node
     def self.parse(tokens)
       source = self.new(SQLTree::Node::TableReference.parse(tokens))
       while tokens.peek && tokens.peek.join?
-        source.joins << Join.parse(tokens)
+        source.joins << SQLTree::Node::Join.parse(tokens)
       end
       return source
     end

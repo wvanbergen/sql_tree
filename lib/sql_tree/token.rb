@@ -36,6 +36,10 @@ class SQLTree::Token
       SQLTree::Token::FULL].include?(self)
   end
   
+  def direction?
+    [SQLTree::Token::ASC, SQLTree::Token::DESC].include?(self)
+  end
+  
   ###################################################################
   # DYNAMIC TOKEN TYPES
   ###################################################################
@@ -107,8 +111,8 @@ class SQLTree::Token
   COMMA  = Class.new(SQLTree::Token).new(',')
 
   # A list of all the SQL reserverd keywords.
-  KEYWORDS = %w{SELECT FROM WHERE GOUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING 
-                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN}
+  KEYWORDS = %w{SELECT FROM WHERE GROUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING 
+                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC}
 
   # Create a token for all the reserved keywords in SQL
   KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword).new(kw)) }

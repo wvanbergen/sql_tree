@@ -14,7 +14,8 @@ module SQLTree::Node
       sql = (self.distinct) ? "SELECT DISTINCT " : "SELECT "
       sql << select.map { |s| s.to_sql }.join(', ')
       sql << " FROM " << from.map { |f| f.to_sql }.join(', ')
-      sql << " WHERE " << where.to_sql if where
+      sql << " WHERE " << where.to_sql       if where
+      sql << " ORDER BY " << order_by.map { |o| o.to_sql }.join(', ') if order_by
       return sql
     end
   
@@ -28,10 +29,10 @@ module SQLTree::Node
         select_node.distinct = true
       end
 
-      select_node.select = self.parse_select_clause(tokens)
-      select_node.from   = self.parse_from_clause(tokens)   if tokens.peek == SQLTree::Token::FROM
-      select_node.where  = self.parse_where_clause(tokens)  if tokens.peek == SQLTree::Token::WHERE
-
+      select_node.select   = self.parse_select_clause(tokens)
+      select_node.from     = self.parse_from_clause(tokens)   if tokens.peek == SQLTree::Token::FROM
+      select_node.where    = self.parse_where_clause(tokens)  if tokens.peek == SQLTree::Token::WHERE
+      select_node.order_by = self.parse_order_clause(tokens)  if tokens.peek == SQLTree::Token::ORDER
       return select_node
     end
     
@@ -68,7 +69,14 @@ module SQLTree::Node
     end
     
     def self.parse_order_clause(tokens)
-      # TODO: implement me
+      tokens.consume(SQLTree::Token::ORDER)
+      tokens.consume(SQLTree::Token::BY)
+      exprs = [SQLTree::Node::Ordering.parse(tokens)]
+      while tokens.peek == SQLTree::Token::COMMA
+        tokens.consume(SQLTree::Token::COMMA)
+        exprs << SQLTree::Node::Ordering.parse(tokens)
+      end
+      return exprs
     end
 
     def self.parse_limit_clause(tokens)

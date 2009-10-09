@@ -4,6 +4,9 @@ module SQLTree::Node
 
     attr_accessor :name, :table
 
+    alias :field :name
+    alias :field= :name=
+
     def initialize(name, table = nil)
       @name = name
       @table = table

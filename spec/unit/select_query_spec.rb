@@ -50,3 +50,32 @@ describe SQLTree::Node::Join do
     SQLTree::Node::Join['LEFT JOIN table t ON other.field = table.field'].table_alias.should == 't'
   end
 end
+
+describe SQLTree::Node::Ordering do
+  it "should parse an ordering with direction" do
+    ordering = SQLTree::Node::Ordering["table.field ASC"]
+    ordering.expression.table.should == 'table'
+    ordering.expression.name.should  == 'field'
+    ordering.direction.should == :asc
+  end
+  
+  it "should parse an ordering without direction" do
+    ordering = SQLTree::Node::Ordering["table.field"]
+    ordering.expression.table.should == 'table'
+    ordering.expression.name.should  == 'field'
+    ordering.direction.should be_nil
+  end
+  
+  it "should parse an ordering without direction" do
+    ordering = SQLTree::Node::Ordering["MD5(3 + 6) DESC"]
+    ordering.expression.should be_kind_of(SQLTree::Node::FunctionExpression)
+    ordering.direction.should == :desc
+  end
+  
+  it "shoulde parse multiple orderings" do
+    tree = SQLTree['SELECT * FROM table ORDER BY field1 ASC, field2 DESC']
+    tree.order_by.should have(2).items
+    tree.order_by[0].direction.should == :asc
+    tree.order_by[1].direction.should == :desc
+  end
+end
