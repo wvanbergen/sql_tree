@@ -15,7 +15,7 @@ describe SQLTree::Tokenizer do
       @tokenizer.tokenize('and').should tokenize_to(:and)
     end
     
-    it "should tokenize muliple keywords" do
+    it "should tokenize muliple separate keywords" do
       @tokenizer.tokenize('SELECT DISTINCT').should tokenize_to(:select, :distinct)
     end
 
@@ -29,6 +29,10 @@ describe SQLTree::Tokenizer do
 
     it "should tokenize quoted variables" do
       @tokenizer.tokenize('"var"').should tokenize_to(sql_var('var'))
+    end
+
+    it "should tokenize quoted variables even when they are a reserved keyword" do
+      @tokenizer.tokenize('"where"').should tokenize_to(sql_var('where'))
     end
 
     it "should tokenize strings" do
@@ -57,13 +61,17 @@ describe SQLTree::Tokenizer do
     
     it "should tokenize commas" do
       @tokenizer.tokenize('a , "b"').should tokenize_to(sql_var('a'), comma, sql_var('b'))
-    end  
-    
-    
+    end
   end
   
-  context "combined tokens"  do
-    it "should tokenize a full sql_query" do
+  context "combining double keywords" do
+    it "should tokenize double keywords" do
+      @tokenizer.tokenize('ORDER BY').should tokenize_to(:order_by)
+    end
+  end
+  
+  context "when tokenizing full queries or query fragments" do
+    it "should tokenize a full SQL query" do
       @tokenizer.tokenize("SELECT a.* FROM a_table AS a WHERE a.id > 1").should tokenize_to(
         :select,  sql_var('a'), dot, :multiply, :from, sql_var('a_table'), :as, sql_var('a'), :where, sql_var('a'), dot, sql_var('id'), :gt, 1)
     end

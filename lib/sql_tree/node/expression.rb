@@ -10,7 +10,13 @@ module SQLTree::Node
       SQLTree::Node::LogicalExpression.parse(tokens)
     end
     
-    def self.parse_single(tokens)
+    # Parses a single, atomic SQL expression. This can be either:
+    # * a full expression within parentheses.
+    # * a logical NOT expression
+    # * an SQL variable
+    # * an SQL function
+    # * a literal SQL value (numeric or string)
+    def self.parse_atomic(tokens)
       case tokens.peek
       when SQLTree::Token::LPAREN
         tokens.consume(SQLTree::Token::LPAREN)
@@ -100,12 +106,12 @@ module SQLTree::Node
     end
     
     def to_tree
-      [SQLTree::Token::OPERATORS[@operator], @lhs.to_tree, @rhs.to_tree]
+      [SQLTree::Token::OPERATORS_HASH[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
     def self.parse(tokens)
       lhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
-      while SQLTree::Token::LOGICAL_OPERATORS.include?(tokens.peek)
+      while SQLTree::Token::COMPARISON_OPERATORS.include?(tokens.peek)
         comparison_operator = tokens.next
         if SQLTree::Token::IS === comparison_operator
 
@@ -159,7 +165,7 @@ module SQLTree::Node
     end
     
     def to_tree
-      [SQLTree::Token::OPERATORS[@operator], @lhs.to_tree, @rhs.to_tree]
+      [SQLTree::Token::OPERATORS_HASH[@operator], @lhs.to_tree, @rhs.to_tree]
     end
     
     def self.parse(tokens)
@@ -175,9 +181,9 @@ module SQLTree::Node
     end
     
     def self.parse_secondary(tokens)
-      expr = Expression.parse_single(tokens)
+      expr = Expression.parse_atomic(tokens)
       while [SQLTree::Token::PLUS, SQLTree::Token::MINUS].include?(tokens.peek)
-        expr = self.new(tokens.next.literal, expr, SQLTree::Node::Expression.parse_single(tokens))
+        expr = self.new(tokens.next.literal, expr, SQLTree::Node::Expression.parse_atomic(tokens))
       end
       return expr
     end
