@@ -83,5 +83,20 @@ describe SQLTree::Node::Expression do
       comparison.lhs.should == SQLTree::Node::Variable.new('field')
       comparison.rhs.should == SQLTree::Node::Value.new('%search%')
     end
+    
+    it "should parse an IN expression correctly" do
+      comparison = SQLTree::Node::Expression["field IN (1,2,3,4)"]
+      comparison.operator.should == 'IN'
+      comparison.lhs.should == SQLTree::Node::Variable.new('field')
+      comparison.rhs.should be_kind_of(SQLTree::Node::SetExpression)
+    end
+    
+    it "should parse a NOT IN expression correctly" do
+      comparison = SQLTree::Node::Expression["field NOT IN (1>2, 3+6, 99)"]
+      comparison.operator.should == 'NOT IN'
+      comparison.lhs.should == SQLTree::Node::Variable.new('field')
+      comparison.rhs.should be_kind_of(SQLTree::Node::SetExpression)
+    end
+    
   end
 end

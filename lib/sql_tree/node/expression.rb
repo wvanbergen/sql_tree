@@ -11,7 +11,7 @@ module SQLTree::Node
     end
     
     # Parses a single, atomic SQL expression. This can be either:
-    # * a full expression within parentheses.
+    # * a full expression (or set of expressions) within parentheses.
     # * a logical NOT expression
     # * an SQL variable
     # * an SQL function
@@ -20,8 +20,8 @@ module SQLTree::Node
       case tokens.peek
       when SQLTree::Token::LPAREN
         tokens.consume(SQLTree::Token::LPAREN)
-        expr = self.parse(tokens)
-        tokens.consume(SQLTree::Token::RPAREN)
+        expr = SQLTree::Node::Expression.parse(tokens)
+        tokens.consume(SQLTree::Token::RPAREN)        
         expr
       when SQLTree::Token::NOT
         SQLTree::Node::LogicalNotExpression.parse(tokens)
@@ -120,7 +120,7 @@ module SQLTree::Node
         end
       elsif SQLTree::Token::NOT === operator_token
         case tokens.peek
-        when SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::BETWEEN
+        when SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::BETWEEN, SQLTree::Token::IN
           "NOT #{tokens.next.literal.upcase}"
         else
           raise SQLTree::Parser::UnexpectedToken.new(tokens.peek)
@@ -134,10 +134,41 @@ module SQLTree::Node
       lhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
       while SQLTree::Token::COMPARISON_OPERATORS.include?(tokens.peek)
         comparison_operator = parse_comparison_operator(tokens)
-        rhs = SQLTree::Node::ArithmeticExpression.parse(tokens)
+        rhs = ['IN', 'NOT IN'].include?(comparison_operator) ?
+                SQLTree::Node::SetExpression.parse(tokens)   :
+                SQLTree::Node::ArithmeticExpression.parse(tokens)
+                
         lhs = self.new(comparison_operator, lhs, rhs)
       end
       return lhs
+    end
+  end
+  
+  class SetExpression < Expression
+    attr_accessor :items
+    
+    def initialize(items = [])
+      @items = items
+    end
+
+    def to_tree
+      items.map { |i| i.to_tree }
+    end
+    
+    def to_sql
+      "(#{items.map {|i| i.to_sql}.join(', ')})"
+    end
+    
+    def self.parse(tokens)
+      tokens.consume(SQLTree::Token::LPAREN)
+      items = [SQLTree::Node::Expression.parse(tokens)]
+      while tokens.peek == SQLTree::Token::COMMA
+        tokens.consume(SQLTree::Token::COMMA)
+        items << SQLTree::Node::Expression.parse(tokens)
+      end
+      tokens.consume(SQLTree::Token::RPAREN)
+      
+      self.new(items)
     end
   end
   

@@ -108,7 +108,7 @@ class SQLTree::Token
 
   # A list of all the SQL reserverd keywords.
   KEYWORDS = %w{SELECT FROM WHERE GOUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING 
-                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN}
+                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN}
 
   # Create a token for all the reserved keywords in SQL
   KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword).new(kw)) }
@@ -127,5 +127,5 @@ class SQLTree::Token
   end
   
   COMPARISON_OPERATORS = COMPARISON_OPERATORS_HASH.map { |(literal, symbol)| const_get(symbol.to_s.upcase) } +
-    [SQLTree::Token::IS, SQLTree::Token::BETWEEN, SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::NOT]
+    [SQLTree::Token::IN, SQLTree::Token::IS, SQLTree::Token::BETWEEN, SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::NOT]
 end
