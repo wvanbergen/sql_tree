@@ -72,7 +72,7 @@ class SQLTree::Parser
   # <tt>*checks</tt>:: a list of token types to consume.
   def consume(*checks) # :raises: SQLTree::Parser::UnexpectedToken
     checks.each do |check|
-      raise UnexpectedToken.new(self.current, check) unless check == self.next
+      raise UnexpectedToken.new(self.current, check) unless check === self.next
     end
   end
 

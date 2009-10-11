@@ -18,7 +18,7 @@ module SQLTree::Node
     def self.parse_field_list(tokens)
       tokens.consume(SQLTree::Token::LPAREN)
       fields = [SQLTree::Node::Variable.parse(tokens)]
-      while tokens.peek == SQLTree::Token::COMMA
+      while SQLTree::Token::COMMA === tokens.peek
         tokens.consume(SQLTree::Token::COMMA)
         fields << SQLTree::Node::Variable.parse(tokens)
       end
@@ -30,7 +30,7 @@ module SQLTree::Node
       tokens.consume(SQLTree::Token::VALUES)
       tokens.consume(SQLTree::Token::LPAREN)
       values = [SQLTree::Node::Expression.parse(tokens)]
-      while tokens.peek == SQLTree::Token::COMMA
+      while SQLTree::Token::COMMA === tokens.peek
         tokens.consume(SQLTree::Token::COMMA)
         values << SQLTree::Node::Expression.parse(tokens)
       end
@@ -43,7 +43,7 @@ module SQLTree::Node
       tokens.consume(SQLTree::Token::INTO)
       insert_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
 
-      insert_query.fields = self.parse_field_list(tokens) if tokens.peek == SQLTree::Token::LPAREN
+      insert_query.fields = self.parse_field_list(tokens) if SQLTree::Token::LPAREN === tokens.peek
       insert_query.values = self.parse_value_list(tokens)
       return insert_query
     end

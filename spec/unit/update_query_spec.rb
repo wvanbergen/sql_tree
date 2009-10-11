@@ -9,7 +9,7 @@ describe SQLTree::Node::UpdateQuery do
     update.updates[0].field.should == 'field1'
     update.updates[0].expression.should == SQLTree::Node::Value.new(1)
     update.updates[1].field.should == 'field2'
-    update.updates[1].expression.should be_kind_of(SQLTree::Node::ArithmeticExpression)
+    update.updates[1].expression.should be_kind_of(SQLTree::Node::Expression)
     update.where.should be_nil
   end
 

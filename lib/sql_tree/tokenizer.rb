@@ -114,7 +114,7 @@ class SQLTree::Tokenizer
     literal << next_char while /[\w]/ =~ peek_char
 
     if SQLTree::Token::KEYWORDS.include?(literal.upcase)
-      handle_token(SQLTree::Token.const_get(literal.upcase), &block)
+      handle_token(SQLTree::Token.const_get(literal.upcase).new(literal), &block)
     else
       handle_token(SQLTree::Token::Variable.new(literal), &block)
     end
@@ -163,7 +163,7 @@ class SQLTree::Tokenizer
   end
 
   # A regular expression that matches all operator characters.
-  OPERATOR_CHARS = /\=|<|>|!|\-|\+|\/|\*|\%/
+  OPERATOR_CHARS = /\=|<|>|!|\-|\+|\/|\*|\%|\||\&/
 
   # Tokenizes an operator in the SQL stream. This method will yield the
   # operator token when the last character of the token is encountered.
@@ -173,7 +173,8 @@ class SQLTree::Tokenizer
       tokenize_number(&block)
     else
       operator << next_char if SQLTree::Token::OPERATORS_HASH.has_key?(operator + peek_char)
-      handle_token(SQLTree::Token.const_get(SQLTree::Token::OPERATORS_HASH[operator].to_s.upcase), &block)
+      operator_class = SQLTree::Token.const_get(SQLTree::Token::OPERATORS_HASH[operator].to_s.upcase)
+      handle_token(operator_class.new(operator), &block)
     end
   end
 end

@@ -18,7 +18,7 @@ module SQLTree::Node
 
     def self.parse(tokens)
       if SQLTree::Token::Variable === tokens.peek
-        if tokens.peek(2) == SQLTree::Token::DOT
+        if SQLTree::Token::DOT === tokens.peek(2)
           SQLTree::Node::Field.parse(tokens)
         else
           self.new(tokens.next.literal)

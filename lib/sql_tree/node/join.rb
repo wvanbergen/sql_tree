@@ -26,13 +26,12 @@ module SQLTree::Node
     def self.parse(tokens)
       join = self.new
 
-      if tokens.peek == SQLTree::Token::FULL
+      if SQLTree::Token::FULL === tokens.peek
         join.join_type = :outer
         tokens.consume(SQLTree::Token::FULL, SQLTree::Token::OUTER)
-      elsif [SQLTree::Token::OUTER, SQLTree::Token::INNER, SQLTree::Token::LEFT, SQLTree::Token::RIGHT].include?(tokens.peek)
+      elsif [SQLTree::Token::OUTER, SQLTree::Token::INNER, SQLTree::Token::LEFT, SQLTree::Token::RIGHT].include?(tokens.peek.class)
         join.join_type = tokens.next.literal.downcase.to_sym
       end
-
 
       tokens.consume(SQLTree::Token::JOIN)
       join.table_reference = SQLTree::Node::TableReference.parse(tokens)

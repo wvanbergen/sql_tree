@@ -44,7 +44,7 @@ describe SQLTree::Tokenizer do
     end
 
     it "should tokenize arithmetic operators" do
-      SQLTree::Tokenizer.tokenize("+ - / * %").should tokenize_to(:plus, :minus, :divide, :multiply, :modulo)
+      SQLTree::Tokenizer.tokenize("+ - / * % || &").should tokenize_to(:plus, :minus, :divide, :multiply, :modulo, :concat, :binary_and)
     end
 
     it "should tokenize parentheses" do

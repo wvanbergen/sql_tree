@@ -30,16 +30,40 @@ class SQLTree::Token
     literal
   end
 
+  def not?
+    SQLTree::Token::NOT === self
+  end
+
+  def optional_not_prefix?
+    [SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::IN].include?(self.class)
+  end
+  
+  def optional_not_suffix?
+    [SQLTree::Token::IS].include?(self.class)
+  end
+  
   # Returns true if this is a JOIN token?
   def join?
     [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT,
       SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL,
-      SQLTree::Token::FULL].include?(self)
+      SQLTree::Token::FULL].include?(self.class)
+  end
+  
+  def prefix_operator?
+    SQLTree::Node::Expression::PrefixOperator::TOKENS.include?(self.class)
+  end
+  
+  def variable?
+    self.kind_of?(SQLTree::Token::Variable)
+  end
+  
+  def value?
+    self.kind_of?(SQLTree::Token::Value)
   end
 
   # Returns true if this is an order direction token.
   def direction?
-    [SQLTree::Token::ASC, SQLTree::Token::DESC].include?(self)
+    [SQLTree::Token::ASC, SQLTree::Token::DESC].include?(self.class)
   end
 
   ###################################################################
@@ -117,21 +141,16 @@ class SQLTree::Token
                 AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC INSERT INTO VALUES DELETE UPDATE SET}
 
   # Create a token for all the reserved keywords in SQL
-  KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword).new(kw)) }
+  KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword)) }
 
-  # A list of keywords that aways occur in fixed combinations. Register these as separate keywords.
-  KEYWORD_COMBINATIONS = [%w{IS NOT}, %w{NOT LIKE}, %w{NOT BETWEEN}, %w{NOT ILIKE}]
-  KEYWORD_COMBINATIONS.each { |kw| const_set(kw.join('_'), Class.new(SQLTree::Token::Keyword).new(kw.join(' '))) }
+  OPERATORS_HASH = { '+' => :plus, '-' => :minus, '*' => :multiply, 
+      '/' => :divide, '%' => :modulo, '||' => :concat, '|' => :binary_or, 
+      '&' => :binary_and, '<<' => :lshift, '>>' => :rshift, '=' => :eq, 
+      '!=' => :ne, '<>' => :ne, '>' => :gt, '<' => :lt, '>=' => :gte, 
+      '<=' => :lte, '==' => :eq }
 
-  ARITHMETHIC_OPERATORS_HASH = { '+' => :plus, '-' => :minus, '*' => :multiply, '/' => :divide, '%' => :modulo }
-  COMPARISON_OPERATORS_HASH  = { '=' => :eq, '!=' => :ne, '<>' => :ne, '>' => :gt, '<' => :lt, '>=' => :gte, '<=' => :lte }
-
-  # Register a token class and single instance for every token.
-  OPERATORS_HASH = ARITHMETHIC_OPERATORS_HASH.merge(COMPARISON_OPERATORS_HASH)
+  # Register a token class and single instance for every operator.
   OPERATORS_HASH.each_pair do |literal, symbol|
-    self.const_set(symbol.to_s.upcase, Class.new(SQLTree::Token::Operator).new(literal)) unless self.const_defined?(symbol.to_s.upcase)
+    self.const_set(symbol.to_s.upcase, Class.new(SQLTree::Token::Operator)) unless self.const_defined?(symbol.to_s.upcase)
   end
-
-  COMPARISON_OPERATORS = COMPARISON_OPERATORS_HASH.map { |(literal, symbol)| const_get(symbol.to_s.upcase) } +
-    [SQLTree::Token::IN, SQLTree::Token::IS, SQLTree::Token::BETWEEN, SQLTree::Token::LIKE, SQLTree::Token::ILIKE, SQLTree::Token::NOT]
 end

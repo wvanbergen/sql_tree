@@ -31,7 +31,7 @@ module SQLTree::Node
       tokens.consume(SQLTree::Token::DELETE)
       tokens.consume(SQLTree::Token::FROM)
       delete_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
-      if tokens.peek == SQLTree::Token::WHERE
+      if SQLTree::Token::WHERE === tokens.peek
         tokens.consume(SQLTree::Token::WHERE)
         delete_query.where = SQLTree::Node::Expression.parse(tokens)
       end

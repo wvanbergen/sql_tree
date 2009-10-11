@@ -14,6 +14,10 @@ module SQLTree::Node
   # queries.
   class Base
 
+    def initialize(attributes = {})
+      attributes.each { |key, value| send(:"#{key}=", value) }
+    end
+
     # Pretty prints this instance for inspection
     def inspect
       "#{self.class.name}[#{self.to_sql}]"

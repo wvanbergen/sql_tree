@@ -14,7 +14,8 @@ class TokenizeTo
 
   def matches?(found_tokens)
     @found_tokens = found_tokens
-    return @found_tokens == @expected_tokens
+    return @found_tokens.length == @expected_tokens.length &&
+        @found_tokens.zip(@expected_tokens).all? { |(f, e)| e === f }
   end
 
   def description

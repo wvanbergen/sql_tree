@@ -32,7 +32,7 @@ module SQLTree::Node
         else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
       end
 
-      if tokens.peek == SQLTree::Token::DOT
+      if SQLTree::Token::DOT === tokens.peek
         table = field_or_table
         tokens.consume(SQLTree::Token::DOT)
         field = case tokens.next

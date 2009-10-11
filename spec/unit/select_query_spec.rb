@@ -18,9 +18,9 @@ describe SQLTree::Node::SelectQuery do
 
     tree.select.length.should == 2
     tree.from.length.should   == 2
-    tree.where.should be_kind_of(SQLTree::Node::ComparisonExpression)
+    tree.where.should be_kind_of(SQLTree::Node::Expression::BinaryOperator)
     tree.group_by.first.should be_kind_of(SQLTree::Node::Field)
-    tree.having.should be_kind_of(SQLTree::Node::ComparisonExpression)
+    tree.having.should be_kind_of(SQLTree::Node::Expression::BinaryOperator)
   end
 end
 
@@ -92,7 +92,7 @@ describe SQLTree::Node::Ordering do
 
   it "should parse an ordering without direction" do
     ordering = SQLTree::Node::Ordering["MD5(3 + 6) DESC"]
-    ordering.expression.should be_kind_of(SQLTree::Node::FunctionExpression)
+    ordering.expression.should be_kind_of(SQLTree::Node::Expression::Function)
     ordering.direction.should == :desc
   end
 

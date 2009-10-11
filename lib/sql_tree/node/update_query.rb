@@ -20,12 +20,12 @@ module SQLTree::Node
       update_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
       tokens.consume(SQLTree::Token::SET)
       update_query.updates = [SQLTree::Node::Assignment.parse(tokens)]
-      while tokens.peek == SQLTree::Token::COMMA
+      while SQLTree::Token::COMMA === tokens.peek
         tokens.consume(SQLTree::Token::COMMA)
         update_query.updates << SQLTree::Node::Assignment.parse(tokens)
       end
       
-      if tokens.peek == SQLTree::Token::WHERE
+      if SQLTree::Token::WHERE === tokens.peek
         tokens.consume(SQLTree::Token::WHERE)
         update_query.where = SQLTree::Node::Expression.parse(tokens)
       end

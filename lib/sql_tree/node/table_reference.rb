@@ -21,8 +21,8 @@ module SQLTree::Node
     def self.parse(tokens)
       if SQLTree::Token::Variable === tokens.next
         table_reference = self.new(tokens.current.literal)
-        if tokens.peek == SQLTree::Token::AS || SQLTree::Token::Variable === tokens.peek
-          tokens.consume(SQLTree::Token::AS) if tokens.peek == SQLTree::Token::AS
+        if SQLTree::Token::AS === tokens.peek || SQLTree::Token::Variable === tokens.peek
+          tokens.consume(SQLTree::Token::AS) if SQLTree::Token::AS === tokens.peek
           table_reference.table_alias = SQLTree::Node::Variable.parse(tokens).name
         end
         return table_reference

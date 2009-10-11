@@ -21,14 +21,16 @@ describe SQLTree::Node::Expression do
 
     it "should parse a logical OR expression correctly" do
       logical = SQLTree::Node::Expression["'this' OR 'that"]
-      logical.operator.should    == :or
-      logical.expressions.should == [SQLTree::Node::Value.new('this'), SQLTree::Node::Value.new('that')]
+      logical.operator.should == 'OR'
+      logical.lhs.should      == SQLTree::Node::Value.new('this')
+      logical.rhs.should      == SQLTree::Node::Value.new('that')
     end
 
     it "should parse a logical AND expression correctly" do
       logical = SQLTree::Node::Expression['1 AND 2']
-      logical.operator.should    == :and
-      logical.expressions        == [SQLTree::Node::Value.new(1), SQLTree::Node::Value.new(2)]
+      logical.operator.should    == 'AND'
+      logical.lhs.should         == SQLTree::Node::Value.new(1)
+      logical.rhs.should         == SQLTree::Node::Value.new(2)
     end
 
     it "should nest a logical AND expression correctly" do
@@ -42,11 +44,11 @@ describe SQLTree::Node::Expression do
     end
 
     it "should parse a NOT expression without parenteheses correctly" do
-      SQLTree::Node::Expression['NOT 1'].should == SQLTree::Node::LogicalNotExpression.new(SQLTree::Node::Value.new(1))
+      SQLTree::Node::Expression['NOT 1'].should == SQLTree::Node::Expression::PrefixOperator.new(:operator => 'NOT', :rhs => SQLTree::Node::Value.new(1))
     end
 
     it "should parse a NOT expression without parenteheses correctly" do
-      SQLTree::Node::Expression['NOT(1)'].should == SQLTree::Node::LogicalNotExpression.new(SQLTree::Node::Value.new(1))
+      SQLTree::Node::Expression['NOT(1)'].should == SQLTree::Node::Expression::PrefixOperator.new(:operator => 'NOT', :rhs => SQLTree::Node::Value.new(1))
     end
 
     it "should parse a comparison expression correctly" do
@@ -88,15 +90,14 @@ describe SQLTree::Node::Expression do
       comparison = SQLTree::Node::Expression["field IN (1,2,3,4)"]
       comparison.operator.should == 'IN'
       comparison.lhs.should == SQLTree::Node::Variable.new('field')
-      comparison.rhs.should be_kind_of(SQLTree::Node::SetExpression)
+      comparison.rhs.should be_kind_of(SQLTree::Node::Expression::List)
     end
 
     it "should parse a NOT IN expression correctly" do
       comparison = SQLTree::Node::Expression["field NOT IN (1>2, 3+6, 99)"]
       comparison.operator.should == 'NOT IN'
       comparison.lhs.should == SQLTree::Node::Variable.new('field')
-      comparison.rhs.should be_kind_of(SQLTree::Node::SetExpression)
+      comparison.rhs.should be_kind_of(SQLTree::Node::Expression::List)
     end
-
   end
 end
