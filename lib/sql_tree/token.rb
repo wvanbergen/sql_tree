@@ -30,12 +30,14 @@ class SQLTree::Token
     literal
   end
 
+  # Returns true if this is a JOIN token?
   def join?
     [SQLTree::Token::JOIN, SQLTree::Token::LEFT, SQLTree::Token::RIGHT,
       SQLTree::Token::INNER, SQLTree::Token::OUTER, SQLTree::Token::NATURAL,
       SQLTree::Token::FULL].include?(self)
   end
 
+  # Returns true if this is an order direction token.
   def direction?
     [SQLTree::Token::ASC, SQLTree::Token::DESC].include?(self)
   end

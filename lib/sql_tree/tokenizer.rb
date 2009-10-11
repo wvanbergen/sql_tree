@@ -14,19 +14,24 @@ class SQLTree::Tokenizer
 
   include Enumerable
 
+  # Returns an array of tokens for the given string.
+  # <tt>string</tt>:: the string to tokenize
+  def self.tokenize(string)
+    self.new(string).tokens
+  end
+
   # The keyword queue, on which kywords are placed before they are yielded
   # to the parser, to enable keyword combining (e.g. NOT LIKE)
   attr_reader :keyword_queue
 
-  def initialize # :nodoc:
+  def initialize(string) # :nodoc:
+    @string = string
+    @current_char_pos = -1
     @keyword_queue = []
   end
 
-  # Returns an array of tokens for the given string.
-  # <tt>string</tt>:: the string to tokenize
-  def tokenize(string)
-    @string = string
-    @current_char_pos = -1
+  # Tokeinzes the string and returns all tokens as an array
+  def tokens
     self.entries
   end
 
