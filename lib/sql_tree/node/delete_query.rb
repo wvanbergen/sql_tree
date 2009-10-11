@@ -1,19 +1,32 @@
 module SQLTree::Node
 
+  # The <tt>DeleteQuery</tt> node represents an SQL DELETE query.
+  #
+  # This node has two children: <tt>table</tt> and <tt>where</tt>.
   class DeleteQuery < Base
 
-    attr_accessor :table, :where
+    # The table (<tt>String</tt>) from which to delete records.
+    attr_accessor :table
+    
+    # The <tt>SQLTree::Node::Expression</tt> instance that defines what
+    # nodes to delete.
+    attr_accessor :where
 
+    # Initializes a new DeleteQuery instance.
     def initialize(table, where = nil)
       @table, @where = table, where
     end
 
+    # Generates an SQL DELETE query from this node.
     def to_sql
       sql = "DELETE FROM #{self.quote_var(table)}"
       sql << " WHERE #{where.to_sql}" if self.where
       sql
     end
     
+    # Parses a DELETE query from a stream of tokens.
+    # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+    #                   of <tt> SQLTree::Parser</tt>.
     def self.parse(tokens)
       tokens.consume(SQLTree::Token::DELETE)
       tokens.consume(SQLTree::Token::FROM)
