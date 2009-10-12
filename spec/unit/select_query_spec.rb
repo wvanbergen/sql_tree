@@ -19,7 +19,7 @@ describe SQLTree::Node::SelectQuery do
     tree.select.length.should == 2
     tree.from.length.should   == 2
     tree.where.should be_kind_of(SQLTree::Node::Expression::BinaryOperator)
-    tree.group_by.first.should be_kind_of(SQLTree::Node::Field)
+    tree.group_by.first.should be_kind_of(SQLTree::Node::Expression::Field)
     tree.having.should be_kind_of(SQLTree::Node::Expression::BinaryOperator)
   end
 end

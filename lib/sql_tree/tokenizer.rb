@@ -116,7 +116,7 @@ class SQLTree::Tokenizer
     if SQLTree::Token::KEYWORDS.include?(literal.upcase)
       handle_token(SQLTree::Token.const_get(literal.upcase).new(literal), &block)
     else
-      handle_token(SQLTree::Token::Variable.new(literal), &block)
+      handle_token(SQLTree::Token::Identifier.new(literal), &block)
     end
   end
 
@@ -150,16 +150,16 @@ class SQLTree::Tokenizer
   end
 
   # Tokenize a quoted variable from the SQL stream. This method will
-  # yield an SQLTree::Token::Variable when to closing quote is found.
+  # yield an SQLTree::Token::Identifier when to closing quote is found.
   #
   # The actual quote character that is used depends on the DBMS. For now,
   # only the more standard double quote is accepted.
-  def tokenize_quoted_variable(&block) # :yields: SQLTree::Token::Variable
+  def tokenize_quoted_variable(&block) # :yields: SQLTree::Token::Identifier
     variable = ''
     until next_char.nil? || current_char == '"' # TODO: allow MySQL quoting mode
       variable << (current_char == "\\" ? next_char : current_char)
     end
-    handle_token(SQLTree::Token::Variable.new(variable), &block)
+    handle_token(SQLTree::Token::Identifier.new(variable), &block)
   end
 
   # A regular expression that matches all operator characters.

@@ -54,11 +54,11 @@ class SQLTree::Token
   end
   
   def variable?
-    self.kind_of?(SQLTree::Token::Variable)
+    self.kind_of?(SQLTree::Token::Identifier)
   end
   
   def value?
-    self.kind_of?(SQLTree::Token::Value)
+    self.kind_of?(SQLTree::Token::LiteralValue)
   end
 
   # Returns true if this is an order direction token.
@@ -70,10 +70,10 @@ class SQLTree::Token
   # DYNAMIC TOKEN TYPES
   ###################################################################
 
-  # The <tt>SQLTree::Token::Value</tt> class is the base class for
+  # The <tt>SQLTree::Token::DynamicToken</tt> class is the base class for
   # every dynamic token. A dynamic token is a token for which the
   # literal value used remains impoirtant during parsing.
-  class Value < SQLTree::Token
+  class DynamicToken < SQLTree::Token
 
     def inspect # :nodoc:
       "#<#{self.class.name.split('::').last}:#{literal.inspect}>"
@@ -85,22 +85,27 @@ class SQLTree::Token
       other.class == self.class && @literal == other.literal
     end
   end
-
-  # The <tt>SQLTree::Token::Variable</tt> class represents SQL
+  
+  # The <tt>SQLTree::Token::Identifier</tt> class represents SQL
   # variables. The variable name is stored in the literal as string,
   # without quotes if they were present.
-  class Variable < SQLTree::Token::Value
+  class Identifier < DynamicToken
+  end
+  
+  # The <tt>SQLTree::Token::LiteralVakue</tt> class represents literal values
+  # like strings and numbers that occur in SQL.
+  class LiteralValue < DynamicToken
   end
 
   # The <tt>SQLTree::Token::String</tt> class represents strings.
   # The actual string is stored in the literal as string without quotes.
-  class String < SQLTree::Token::Value
+  class String < LiteralValue
   end
 
   # The <tt>SQLTree::Token::Keyword</tt> class represents numbers.
   # The actual number is stored as an integer or float in the token's
   # literal.
-  class Number < SQLTree::Token::Value
+  class Number < LiteralValue
   end
 
   ###################################################################

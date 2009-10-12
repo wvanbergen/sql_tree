@@ -15,15 +15,15 @@ module SQLTree::Node
     end
 
     def ==(other)
-      other.table = self.table && other.table_alias == self.table_alias
+      other.class == self.class && other.table == self.table && other.table_alias == self.table_alias
     end
 
     def self.parse(tokens)
-      if SQLTree::Token::Variable === tokens.next
+      if SQLTree::Token::Identifier === tokens.next
         table_reference = self.new(tokens.current.literal)
-        if SQLTree::Token::AS === tokens.peek || SQLTree::Token::Variable === tokens.peek
+        if SQLTree::Token::AS === tokens.peek || SQLTree::Token::Identifier === tokens.peek
           tokens.consume(SQLTree::Token::AS) if SQLTree::Token::AS === tokens.peek
-          table_reference.table_alias = SQLTree::Node::Variable.parse(tokens).name
+          table_reference.table_alias = tokens.next.literal
         end
         return table_reference
       else

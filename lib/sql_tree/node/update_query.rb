@@ -9,7 +9,7 @@ module SQLTree::Node
     end
     
     def to_sql
-      sql = "UPDATE #{self.quote_var(table)} SET "
+      sql = "UPDATE #{table.to_sql} SET "
       sql << updates.map { |u| u.to_sql }.join(', ')
       sql << " WHERE " << where.to_sql if self.where
       sql
@@ -17,7 +17,7 @@ module SQLTree::Node
     
     def self.parse(tokens)
       tokens.consume(SQLTree::Token::UPDATE)
-      update_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
+      update_query = self.new(SQLTree::Node::TableReference.parse(tokens))
       tokens.consume(SQLTree::Token::SET)
       update_query.updates = [SQLTree::Node::Assignment.parse(tokens)]
       while SQLTree::Token::COMMA === tokens.peek

@@ -1,6 +1,6 @@
 module SQLTree::Node
 
-  class SelectExpression < Base
+  class SelectDeclaration < Base
 
     attr_accessor :expression, :variable
 
@@ -21,10 +21,14 @@ module SQLTree::Node
         return SQLTree::Node::ALL_FIELDS
       else
         expression = SQLTree::Node::Expression.parse(tokens)
-        expr = SQLTree::Node::SelectExpression.new(expression)
+        expr = SQLTree::Node::SelectDeclaration.new(expression)
         if SQLTree::Token::AS === tokens.peek
           tokens.consume(SQLTree::Token::AS)
-          expr.variable = SQLTree::Node::Variable.parse(tokens).name
+          if SQLTree::Token::Identifier === tokens.peek
+            expr.variable = tokens.next.literal
+          else
+            raise SQLTree::Parser::UnexpectedToken.new(tokens.peek)
+          end
         end
         return expr
       end
@@ -35,11 +39,11 @@ module SQLTree::Node
     end
   end
 
-  class AllFieldsExpression < Expression
+  class AllFieldsDeclaration < Base
     def to_sql
       '*'
     end
   end
 
-  ALL_FIELDS = AllFieldsExpression.new
+  ALL_FIELDS = AllFieldsDeclaration.new
 end

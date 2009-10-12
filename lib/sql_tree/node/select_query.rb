@@ -43,10 +43,10 @@ module SQLTree::Node
     end
 
     def self.parse_select_clause(tokens)
-      expressions = [SQLTree::Node::SelectExpression.parse(tokens)]
+      expressions = [SQLTree::Node::SelectDeclaration.parse(tokens)]
       while SQLTree::Token::COMMA === tokens.peek
         tokens.consume(SQLTree::Token::COMMA)
-        expressions << SQLTree::Node::SelectExpression.parse(tokens)
+        expressions << SQLTree::Node::SelectDeclaration.parse(tokens)
       end
       return expressions
     end

@@ -6,7 +6,7 @@ module SQLTree::Node
   # This node has two children: <tt>field</tt> and <tt>expression</tt>.
   class Assignment < Base
     
-    # The field (<tt>String</tt>) to update 
+    # The field (<tt>SQLTree::Node::Expression::Field</tt>) to update.
     attr_accessor :field
     
     # A <tt>SQLTree::Node::Expression</tt> instance that is used to 
@@ -20,14 +20,14 @@ module SQLTree::Node
     
     # Generates an SQL fragment for this node.
     def to_sql
-      "#{quote_var(field)} = #{expression.to_sql}"
+      "#{field.to_sql} = #{expression.to_sql}"
     end
     
     # Parses an Assignment node from a stream of tokens
     # <tt>tokens</tt>:: The token stream to parse from, which is an instance
     #                   of <tt>SQLTree::Parser</tt>.
     def self.parse(tokens)
-      assignment = self.new(SQLTree::Node::Variable.parse(tokens).name)
+      assignment = self.new(SQLTree::Node::Expression::Field.parse(tokens))
       tokens.consume(SQLTree::Token::EQ)
       assignment.expression = SQLTree::Node::Expression.parse(tokens)
       assignment

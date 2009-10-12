@@ -9,7 +9,7 @@ module SQLTree::Node
     end
 
     def to_sql
-      sql = "INSERT INTO #{self.quote_var(table)} "
+      sql = "INSERT INTO #{table.to_sql} "
       sql << '(' + fields.map { |f| f.to_sql }.join(', ') + ') ' if fields
       sql << 'VALUES (' + values.map { |v| v.to_sql }.join(', ') + ')'
       sql
@@ -17,10 +17,10 @@ module SQLTree::Node
     
     def self.parse_field_list(tokens)
       tokens.consume(SQLTree::Token::LPAREN)
-      fields = [SQLTree::Node::Variable.parse(tokens)]
+      fields = [SQLTree::Node::Expression::Field.parse(tokens)]
       while SQLTree::Token::COMMA === tokens.peek
         tokens.consume(SQLTree::Token::COMMA)
-        fields << SQLTree::Node::Variable.parse(tokens)
+        fields << SQLTree::Node::Expression::Field.parse(tokens)
       end
       tokens.consume(SQLTree::Token::RPAREN)
       return fields
@@ -41,7 +41,7 @@ module SQLTree::Node
     def self.parse(tokens)
       tokens.consume(SQLTree::Token::INSERT)
       tokens.consume(SQLTree::Token::INTO)
-      insert_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
+      insert_query = self.new(SQLTree::Node::TableReference.parse(tokens))
 
       insert_query.fields = self.parse_field_list(tokens) if SQLTree::Token::LPAREN === tokens.peek
       insert_query.values = self.parse_value_list(tokens)

@@ -37,7 +37,7 @@ def tokenize_to(*expected_tokens)
 end
 
 def sql_var(name)
-  SQLTree::Token::Variable.new(name.to_s)
+  SQLTree::Token::Identifier.new(name.to_s)
 end
 
 def dot

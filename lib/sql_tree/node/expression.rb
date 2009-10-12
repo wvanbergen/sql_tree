@@ -44,11 +44,13 @@ module SQLTree::Node
       elsif tokens.peek.variable?
         if SQLTree::Token::LPAREN === tokens.peek(2)
           FunctionCall.parse(tokens)
+        elsif SQLTree::Token::DOT === tokens.peek(2)
+          Field.parse(tokens)
         else
-          SQLTree::Node::Variable.parse(tokens)
+          Variable.parse(tokens)
         end
       else
-        SQLTree::Node::Value.parse(tokens)
+        Value.parse(tokens)
       end
     end
     
@@ -215,7 +217,7 @@ module SQLTree::Node
           return List.parse(tokens)
         elsif ['IS', 'IS NOT'].include?(operator)
           tokens.consume(SQLTree::Token::NULL)
-          return SQLTree::Node::Value.new(nil)
+          return SQLTree::Node::Expression::Value.new(nil)
         else
           return parse(tokens, precedence + 1)
         end
@@ -328,6 +330,140 @@ module SQLTree::Node
       def self.parse(tokens)
         return self.new(:function => tokens.next.literal, 
             :argument_list => SQLTree::Node::Expression::List.parse(tokens))
+      end
+    end
+    
+    # Represents alitreal value in an SQL expression. This node is a leaf node
+    # and thus has no child nodes.
+    #
+    # A value can either be:
+    # * the SQL <tt>NULL</tt> keyword, which is represented by <tt>nil</tt>.
+    # * an SQL string, which is represented by a <tt>String</tt> instance.
+    # * an SQL date or time value, which can be represented as a <tt>Date</tt>, 
+    #   <tt>Time</tt> or <tt>DateTime</tt> instance.
+    # * an integer or decimal value, which is represented by an appropriate 
+    #   <tt>Numeric</tt> instance.
+    class Value < self
+      
+      # The actual value this node represents.
+      attr_accessor :value
+
+      def initialize(value) # :nodoc:
+        @value = value
+      end
+      
+      # Generates an SQL representation for this value.
+      #
+      # This method will make sure that the value is quoted correctly, so
+      # that the resulting SQL query can be executed safely.
+      def to_sql
+        case value
+        when nil            then 'NULL'
+        when String         then quote_str(@value)
+        when Numeric        then @value.to_s
+        when Date           then @value.strftime("'%Y-%m-%d'")
+        when DateTime, Time then @value.strftime("'%Y-%m-%d %H:%M:%S'")
+        else raise "Don't know how te represent this value in SQL!"
+        end
+      end
+
+      def ==(other) # :nodoc:
+        other.kind_of?(self.class) && other.value == self.value
+      end
+
+      # Parses a literal value.
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
+      def self.parse(tokens)
+        case tokens.next
+        when SQLTree::Token::String, SQLTree::Token::Number
+          SQLTree::Node::Expression::Value.new(tokens.current.literal)
+        when SQLTree::Token::NULL
+          SQLTree::Node::Expression::Value.new(nil)
+        else
+          raise SQLTree::Parser::UnexpectedToken.new(tokens.current, :literal)
+        end
+      end
+    end
+    
+    # Represents a variable within an SQL expression. This is a leaf node, so it
+    # does not have any child nodes. A variale can point to a field of a table or 
+    # to another expresison that was declared elsewhere.
+    class Variable < self
+      
+      # The name of the variable as <tt>String</tt>.
+      attr_accessor :name
+
+      def initialize(name) # :nodoc:
+        @name = name
+      end
+
+      # Generates a quoted reference to the variable that can be used in safely
+      # in SQL queries.
+      def to_sql
+        quote_var(@name)
+      end
+
+      def ==(other) # :nodoc:
+        other.class == self.class && other.name == self.name
+      end
+
+      # Parses an SQL variable.
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
+      def self.parse(tokens)
+        if SQLTree::Token::Identifier === tokens.peek
+          self.new(tokens.next.literal)
+        else
+          raise SQLTree::Parser::UnexpectedToken.new(tokens.peek, :variable)
+        end
+      end
+    end
+    
+    class Field < Variable
+
+      attr_accessor :name, :table
+
+      alias :field :name
+      alias :field= :name=
+
+      def initialize(name, table = nil)
+        @name = name
+        @table = table
+      end
+
+      def quote_var(name)
+        return '*' if name == :all
+        super(name)
+      end
+
+      def to_sql
+        @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
+      end
+
+      def ==(other)
+        other.class == self.class && other.name == self.name && other.table == self.table
+      end
+
+      def self.parse(tokens)
+        field_or_table = case tokens.next
+          when SQLTree::Token::MULTIPLY then :all
+          when SQLTree::Token::Identifier then tokens.current.literal
+          else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+        end
+
+        if SQLTree::Token::DOT === tokens.peek
+          table = field_or_table
+          tokens.consume(SQLTree::Token::DOT)
+          field = case tokens.next
+            when SQLTree::Token::MULTIPLY then :all
+            when SQLTree::Token::Identifier then tokens.current.literal
+            else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+          end
+          self.new(field, table)
+        else
+          self.new(field_or_table)
+        end
       end
     end
   end

@@ -5,7 +5,7 @@ module SQLTree::Node
   # This node has two children: <tt>table</tt> and <tt>where</tt>.
   class DeleteQuery < Base
 
-    # The table (<tt>String</tt>) from which to delete records.
+    # The table (<tt>SQLTree::Node::TableReference</tt>) from which to delete records.
     attr_accessor :table
     
     # The <tt>SQLTree::Node::Expression</tt> instance that defines what
@@ -19,7 +19,7 @@ module SQLTree::Node
 
     # Generates an SQL DELETE query from this node.
     def to_sql
-      sql = "DELETE FROM #{self.quote_var(table)}"
+      sql = "DELETE FROM #{table.to_sql}"
       sql << " WHERE #{where.to_sql}" if self.where
       sql
     end
@@ -30,7 +30,7 @@ module SQLTree::Node
     def self.parse(tokens)
       tokens.consume(SQLTree::Token::DELETE)
       tokens.consume(SQLTree::Token::FROM)
-      delete_query = self.new(SQLTree::Node::Variable.parse(tokens).name)
+      delete_query = self.new(SQLTree::Node::TableReference.parse(tokens))
       if SQLTree::Token::WHERE === tokens.peek
         tokens.consume(SQLTree::Token::WHERE)
         delete_query.where = SQLTree::Node::Expression.parse(tokens)
