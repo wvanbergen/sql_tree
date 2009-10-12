@@ -10,7 +10,7 @@ describe SQLTree::Node::InsertQuery do
     insert.values[0].should == SQLTree::Node::Value.new(1)
     insert.values[1].should == SQLTree::Node::Value.new('two')
     insert.values[2].should be_kind_of(SQLTree::Node::Expression::BinaryOperator)
-    insert.values[3].should be_kind_of(SQLTree::Node::Expression::Function)
+    insert.values[3].should be_kind_of(SQLTree::Node::Expression::FunctionCall)
   end
   
   it "should parse an insert query with field list" do

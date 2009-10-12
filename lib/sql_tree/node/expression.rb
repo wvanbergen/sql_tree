@@ -42,7 +42,7 @@ module SQLTree::Node
         PrefixOperator.parse(tokens)
       elsif tokens.peek.variable?
         if SQLTree::Token::LPAREN === tokens.peek(2)
-          Function.parse(tokens)
+          FunctionCall.parse(tokens)
         else
           SQLTree::Node::Variable.parse(tokens)
         end
@@ -51,6 +51,9 @@ module SQLTree::Node
       end
     end
     
+    # A prefix operator expression parses a construct that consists of an
+    # operator and an expression. Currently, the only prefix operator that 
+    # is supported is the NOT keyword.
     class PrefixOperator < self
       
       TOKENS = [SQLTree::Token::NOT]
@@ -178,7 +181,7 @@ module SQLTree::Node
       end
     end
     
-    class Function < Expression
+    class FunctionCall < self
       attr_accessor :function, :arguments
 
       def to_sql

@@ -92,7 +92,7 @@ describe SQLTree::Node::Ordering do
 
   it "should parse an ordering without direction" do
     ordering = SQLTree::Node::Ordering["MD5(3 + 6) DESC"]
-    ordering.expression.should be_kind_of(SQLTree::Node::Expression::Function)
+    ordering.expression.should be_kind_of(SQLTree::Node::Expression::FunctionCall)
     ordering.direction.should == :desc
   end
 
