@@ -13,8 +13,8 @@ module SQLTree::Node
   # SQLTree::Node::NodeType['SQL fragment'] construct to parse SQL
   # queries.
   class Base
-
-    def initialize(attributes = {})
+    
+    def initialize(attributes = {}) # :nodoc:
       attributes.each { |key, value| send(:"#{key}=", value) }
     end
 

@@ -8,14 +8,15 @@ module SQLTree::Node
   #
   # This is an abtract class: its parse method will never return an
   # <tt>SQLTree::Node::Expression</tt> instance, but always an instance
-  # of one of its subclasses.
+  # of one of its subclasses. The concrete expression classes are defined in the
+  # SQLTree::Node::Expression namespace.
   class Expression < Base
 
     # Parses an SQL expression from a stream of tokens.
     #
     # This method will start trying to parse the token stream as a 
-    # <tt>SQLTree::Node::LogicalExpression</tt>, which will in turn try to parse it as other
-    # kinds of expressions if a logical expression is not appropriate.
+    # <tt>SQLTree::Node::Expression::BinaryOperator</tt>, which will in turn try 
+    # to parse it as other kinds of expressions if a binary expression is not appropriate.
     #
     # <tt>tokens</tt>:: The token stream to parse from, which is an instance
     #                   of <tt> SQLTree::Parser</tt>.
@@ -54,13 +55,21 @@ module SQLTree::Node
     # A prefix operator expression parses a construct that consists of an
     # operator and an expression. Currently, the only prefix operator that 
     # is supported is the NOT keyword.
+    #
+    # This node has two child nodes: <tt>operator</tt> and <tt>rhs</tt>.
     class PrefixOperator < self
       
+      # The list of operator tokens that can be used as prefix operator.
       TOKENS = [SQLTree::Token::NOT]
       
+      # The SQL operator as <tt>String</tt> that was used for this expression.
       attr_accessor :operator
+      
+      # The right hand side of the prefix expression, i.e. the <tt>SQLTree::Node::Expression</tt>
+      # instance that appeared after the operator.
       attr_accessor :rhs
       
+      # Generates an SQL fragment for this prefix operator expression.
       def to_sql
         "#{operator.upcase} #{rhs.to_sql}"
       end
@@ -70,10 +79,16 @@ module SQLTree::Node
           self.operator.upcase == other.operator.upcase
       end
       
+      # Parses the operator from the token stream.
+      # <tt>tokens</tt>:: the token stream to parse from.
       def self.parse_operator(tokens)
         tokens.next.literal
       end
       
+      # Parses a prefix operator expression, by first parsing the operator
+      # and then parsing the right hand side expression.
+      # <tt>tokens</tt>:: the token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
       def self.parse(tokens)
         if tokens.peek.prefix_operator?
           node = self.new
@@ -86,19 +101,54 @@ module SQLTree::Node
       end
     end
     
+    # A postfix operator expression is a construct in which the operator appears 
+    # after a (left-hand side) expression.
+    #
+    # This operator has two child nodes: <tt>operator</tt> and <tt>lhs</tt>.
+    #
+    # Currently, SQLTreedoes not support any postfix operator.
     class PostfixOperator < self
       
-      attr_accessor :operator
+      # The left-hand side <tt>SQLTree::Node::Expression</tt> instance that was parsed
+      # before the postfix operator.
       attr_accessor :lhs
       
+      # The postfoix operator for this expression as <tt>String</tt>.
+      attr_accessor :operator
+      
+      def ==(other) # :nodoc:
+        self.class == other.class && self.operator == other.operator && self.lhs == other.lhs
+      end
+      
+      # Generates an SQL fragment for this postfix operator expression.
+      def to_sql
+        "#{lhs.to_sql} #{operator}"
+      end
+      
+      # Parses a postfix operator expression. This method is not yet implemented.
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
       def self.parse(tokens)
+        raise "Not yet implemented"
       end
     end
     
+    # A binary operator expression consists of a left-hand side expression (lhs), the
+    # binary operator itself and a right-hand side expression (rhs). It therefore has
+    # three children: <tt>operator</tt>, <tt>lhs</tt> and <tt>rhs</tt>.
+    #
+    # When multiple binary operators appear in an expression, they can be grouped
+    # using parenthesis (e.g. "(1 + 3) / 2", or "1 + (3 / 2)" ). If the parentheses
+    # are absent, the grouping is determined using the precedence of the operator.
     class BinaryOperator < self
       
-      # The token precedence list
-      # The token precedence list is taken from the SQLite3 documentation.
+      # The token precedence list. Tokens that occur first in this list have
+      # the lowest precedence, the last tokens have the highest. This impacts
+      # parsing when no parentheses are used to indicate how operators should
+      # be grouped.
+      #
+      # The token precedence list is taken from the SQLite3 documentation:
+      # http://www.sqlite.org/lang_expr.html
       TOKEN_PRECEDENCE = [
           [SQLTree::Token::OR],
           [SQLTree::Token::AND],
@@ -110,21 +160,34 @@ module SQLTree::Node
           [SQLTree::Token::CONCAT],
         ]
       
+      # A list of binary operator tokens, taken from the operator precedence list.
       TOKENS = TOKEN_PRECEDENCE.flatten
       
+      # The operator to use for this binary operator expression.
       attr_accessor :operator
+      
+      # The left hand side <tt>SQLTree::Node::Expression</tt> instance for this operator.
       attr_accessor :lhs
+      
+      # The rights hand side <tt>SQLTree::Node::Expression</tt> instance for this operator.
       attr_accessor :rhs
       
+      # Generates an SQL fragment for this exression.
       def to_sql
         "(#{lhs.to_sql} #{operator} #{rhs.to_sql})"
       end
       
-      def ==(other)
+      def ==(other) # :nodoc:
         self.class == other.class && self.operator == other.operator &&
           self.lhs == other.lhs && self.rhs == other.rhs
       end
       
+      # Parses the operator for this expression. 
+      #  
+      # Some operators can be negated using the NOT operator (e.g. <tt>IS NOT</tt>, 
+      # <tt>NOT LIKE</tt>). This is handled in this function as well.
+      #
+      # <tt>tokens</tt>:: The token stream to parse from.
       def self.parse_operator(tokens)
         if tokens.peek.optional_not_suffix? && tokens.peek(2).not?
           return "#{tokens.next.literal.upcase} #{tokens.next.literal.upcase}"
@@ -134,26 +197,53 @@ module SQLTree::Node
           return tokens.next.literal.upcase
         end
       end
-    
-      def self.parse_rhs(tokens, level, operator = nil)
+
+      # Parses the right hand side expression of the operator.
+      #
+      # Usually, this will parse another BinaryOperator expression with a higher
+      # precedence, but for some operators (+IN+ and +IS+), the default behavior 
+      # is overriden to implement exceptions.
+      #
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
+      # <tt>precedence</tt>:: The current precedence level. By default, this method
+      #                       will try to parse a BinaryOperator expression with a 
+      #                       one higher precedence level than the current level.
+      # <tt>operator</tt>:: The operator that was parsed.
+      def self.parse_rhs(tokens, precedence, operator = nil)
         if ['IN', 'NOT IN'].include?(operator)
           return List.parse(tokens)
         elsif ['IS', 'IS NOT'].include?(operator)
           tokens.consume(SQLTree::Token::NULL)
           return SQLTree::Node::Value.new(nil)
         else
-          return parse(tokens, level + 1)
+          return parse(tokens, precedence + 1)
         end
       end
       
-      def self.parse(tokens, level = 0)
-        if level >= TOKEN_PRECEDENCE.length
+      # Parses the binary operator by first parsing the left hand side, then the operator
+      # itself, and finally the right hand side.
+      #
+      # This method will try to parse the lowest precedence operator first, and gradually
+      # try to parse operators with a higher precedence level. The left and right hand side
+      # will both be parsed with a higher precedence level. This ensures that the resulting
+      # expression is grouped correctly.
+      #
+      # If no binary operator is found of any precedence level, this method will back on
+      # pasring an atomic expression, see <tt>SQLTree::Node::Expression.parse_atomic</tt>.
+      #
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
+      # <tt>precedence</tt>:: The current precedence level. Starts with the lowest 
+      #                       precedence level (0) by default.
+      def self.parse(tokens, precedence = 0)
+        if precedence >= TOKEN_PRECEDENCE.length
           return SQLTree::Node::Expression.parse_atomic(tokens)
         else
-          expr = parse(tokens, level + 1)
-          while TOKEN_PRECEDENCE[level].include?(tokens.peek.class) || (tokens.peek && tokens.peek.not?)
+          expr = parse(tokens, precedence + 1)
+          while TOKEN_PRECEDENCE[precedence].include?(tokens.peek.class) || (tokens.peek && tokens.peek.not?)
             operator = parse_operator(tokens)
-            rhs      = parse_rhs(tokens, level, operator)
+            rhs      = parse_rhs(tokens, precedence, operator)
             expr     = self.new(:operator => operator, :lhs => expr, :rhs => rhs)
           end
           return expr
@@ -161,19 +251,50 @@ module SQLTree::Node
       end
     end
     
+    # Parses a comma-separated list of expressions, which is used after the IN operator.
+    # The attribute <tt>items</tt> contains the array of child nodes, all instances of
+    # <tt>SQLTree::Node::Expression</tt>
     class List < self
+      
+      # Include the enumerable module to simplify handling the items in this list.
+      include Enumerable
+      
+      # The items that appear in the list, i.e. an array of <tt>SQLTree::Node::Expression</tt>
+      # instances.
       attr_accessor :items
 
+      # Generates an SQL fragment for this list.
       def to_sql
         "(#{items.map {|i| i.to_sql}.join(', ')})"
       end
+      
+      def ==(other) # :nodoc:
+        self.class == other.clss && self.items == oher.items
+      end
 
+      # Returns true if this list has no items.
+      def empty?
+        items.empty?
+      end
+      
+      # Makes sure the enumerable module works over the items in the list.
+      def each(&block) # :nodoc:
+        items.each(&block)
+      end
+
+      # Parses a list of expresison by parsing expressions as long as it sees
+      # a comma that indicates the presence of a next expression.
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
       def self.parse(tokens)
         tokens.consume(SQLTree::Token::LPAREN)
-        items = [SQLTree::Node::Expression.parse(tokens)]
-        while SQLTree::Token::COMMA === tokens.peek
-          tokens.consume(SQLTree::Token::COMMA)
+        items = []
+        unless SQLTree::Token::RPAREN === tokens.peek
           items << SQLTree::Node::Expression.parse(tokens)
+          while SQLTree::Token::COMMA === tokens.peek
+            tokens.consume(SQLTree::Token::COMMA)
+            items << SQLTree::Node::Expression.parse(tokens)
+          end
         end
         tokens.consume(SQLTree::Token::RPAREN)
 
@@ -181,29 +302,33 @@ module SQLTree::Node
       end
     end
     
+    # Represents a SQL function call expression. This node has two child nodes:
+    # <tt>function</tt> and <tt>argument_list</tt>.
     class FunctionCall < self
-      attr_accessor :function, :arguments
 
+      # The name of the function that is called as <tt>String</tt>.
+      attr_accessor :function
+      
+      # Th argument list as <tt>SQLTree::Node::Expression::List</tt> instance.
+      attr_accessor :argument_list
+
+      # Generates an SQL fragment for this function call.
       def to_sql
-        "#{@function}(" + @arguments.map { |e| e.to_sql }.join(', ') + ")"
+        "#{function}(" + argument_list.items.map { |e| e.to_sql }.join(', ') + ")"
+      end
+      
+      def ==(other) # :nodoc:
+        self.class == other.class && self.function == other.function && self.argument_list == other.argument_list
       end
 
+      # Parses a function call by first parsing the function name and than
+      # parsing the argument list.
+      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
+      #                   of <tt> SQLTree::Parser</tt>.
       def self.parse(tokens)
-        fcall = self.new(:function => tokens.next.literal, :arguments => [])
-        tokens.consume(SQLTree::Token::LPAREN)
-        
-        # See if there are any arguments given.
-        unless SQLTree::Token::RPAREN === tokens.peek
-          # Parse arguments one by one.
-          fcall.arguments << SQLTree::Node::Expression.parse(tokens)
-          while SQLTree::Token::COMMA === tokens.peek
-            tokens.consume(SQLTree::Token::COMMA)
-            fcall.arguments << SQLTree::Node::Expression.parse(tokens)
-          end
-        end
-        tokens.consume(SQLTree::Token::RPAREN)
-        return fcall
+        return self.new(:function => tokens.next.literal, 
+            :argument_list => SQLTree::Node::Expression::List.parse(tokens))
       end
-    end    
+    end
   end
 end

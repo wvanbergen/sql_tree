@@ -10,13 +10,13 @@ describe SQLTree::Node::Expression do
     it "shoud parse a function call without arguments correctly" do
       function = SQLTree::Node::Expression['NOW()']
       function.function.should == 'NOW'
-      function.arguments.should be_empty
+      function.argument_list.should be_empty
     end
 
     it "shoud parse a function call with arguments correctly" do
       function = SQLTree::Node::Expression["MD5('string')"]
       function.function.should == 'MD5'
-      function.arguments.should == [SQLTree::Node::Value.new('string')]
+      function.argument_list.items.should == [SQLTree::Node::Value.new('string')]
     end
 
     it "should parse a logical OR expression correctly" do
