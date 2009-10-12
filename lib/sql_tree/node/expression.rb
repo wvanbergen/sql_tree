@@ -432,11 +432,6 @@ module SQLTree::Node
         @table = table
       end
 
-      def quote_var(name)
-        return '*' if name == :all
-        super(name)
-      end
-
       def to_sql
         @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
       end
@@ -453,14 +448,12 @@ module SQLTree::Node
         end
 
         if SQLTree::Token::DOT === tokens.peek
-          table = field_or_table
           tokens.consume(SQLTree::Token::DOT)
-          field = case tokens.next
-            when SQLTree::Token::MULTIPLY then :all
-            when SQLTree::Token::Identifier then tokens.current.literal
-            else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+          if SQLTree::Token::Identifier === tokens.peek
+            self.new(tokens.next.literal, field_or_table)
+          else
+            raise SQLTree::Parser::UnexpectedToken.new(tokens.next)
           end
-          self.new(field, table)
         else
           self.new(field_or_table)
         end
