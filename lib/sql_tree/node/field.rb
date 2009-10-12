@@ -1,4 +1,0 @@
-module SQLTree::Node
-
-
-end
