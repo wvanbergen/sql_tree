@@ -7,9 +7,8 @@ The library can parse an SQL query (a string) to represent the query using
 a syntax tree, and it can generate an SQL query from a syntax tree. The syntax
 tree ca be used to inspect to query, or to modify it.
 
-This library is currently under heavy development. This means that not all
-SQL constructs are supported yet. For now, only SQL <tt>SELECT</tt> queries
-are supported.
+This library is currently in the early stages. This means that the API is not
+yet stable and not all SQL constructs are implemented yet.
 
 == Installation
 
@@ -30,7 +29,9 @@ Consider the following example:
 
 == Additional information
 
+This library is written by Willem van Bergen and is MIT licensed (see the 
+LICENSE file).
+
+* Full RDoc API documentation can be found at http://rdoc.info/projects/wvanbergen/sql_tree
 * See the project wiki at http://wiki.github.com/wvanbergen/sql_tree for more
   information about using this library.
-* This plugin is written by Willem van Bergen and is MIT licensed (see the
-  LICENSE file).
