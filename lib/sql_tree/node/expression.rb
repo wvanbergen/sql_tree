@@ -59,7 +59,7 @@ module SQLTree::Node
     # is supported is the NOT keyword.
     #
     # This node has two child nodes: <tt>operator</tt> and <tt>rhs</tt>.
-    class PrefixOperator < self
+    class PrefixOperator  < SQLTree::Node::Expression
       
       # The list of operator tokens that can be used as prefix operator.
       TOKENS = [SQLTree::Token::NOT]
@@ -109,7 +109,7 @@ module SQLTree::Node
     # This operator has two child nodes: <tt>operator</tt> and <tt>lhs</tt>.
     #
     # Currently, SQLTreedoes not support any postfix operator.
-    class PostfixOperator < self
+    class PostfixOperator  < SQLTree::Node::Expression
       
       # The left-hand side <tt>SQLTree::Node::Expression</tt> instance that was parsed
       # before the postfix operator.
@@ -142,7 +142,7 @@ module SQLTree::Node
     # When multiple binary operators appear in an expression, they can be grouped
     # using parenthesis (e.g. "(1 + 3) / 2", or "1 + (3 / 2)" ). If the parentheses
     # are absent, the grouping is determined using the precedence of the operator.
-    class BinaryOperator < self
+    class BinaryOperator  < SQLTree::Node::Expression
       
       # The token precedence list. Tokens that occur first in this list have
       # the lowest precedence, the last tokens have the highest. This impacts
@@ -226,18 +226,24 @@ module SQLTree::Node
       # Parses the binary operator by first parsing the left hand side, then the operator
       # itself, and finally the right hand side.
       #
+      #   BinaryOperator -> Expression <operator> Expression
+      #
       # This method will try to parse the lowest precedence operator first, and gradually
       # try to parse operators with a higher precedence level. The left and right hand side
       # will both be parsed with a higher precedence level. This ensures that the resulting
       # expression is grouped correctly.
       #
       # If no binary operator is found of any precedence level, this method will back on
-      # pasring an atomic expression, see <tt>SQLTree::Node::Expression.parse_atomic</tt>.
+      # pasring an atomic expression, see {SQLTree::Node::Expression.parse_atomic}.
       #
-      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
-      #                   of <tt> SQLTree::Parser</tt>.
-      # <tt>precedence</tt>:: The current precedence level. Starts with the lowest 
-      #                       precedence level (0) by default.
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @param [Integer] precedence The current precedence level. Starts with the lowest 
+      #    precedence level (0) by default.
+      # @return [SQLTree::Node::Expression] The parsed expression. This may not be 
+      #    a binary operator expression, as this method falls back on parsing other
+      #    expresison types if no binary operator is found.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      #    encountered during parsing.      
       def self.parse(tokens, precedence = 0)
         if precedence >= TOKEN_PRECEDENCE.length
           return SQLTree::Node::Expression.parse_atomic(tokens)
@@ -255,15 +261,25 @@ module SQLTree::Node
     
     # Parses a comma-separated list of expressions, which is used after the IN operator.
     # The attribute <tt>items</tt> contains the array of child nodes, all instances of
-    # <tt>SQLTree::Node::Expression</tt>
-    class List < self
+    # {SQLTree::Node::Expression}.
+    class List < SQLTree::Node::Expression
       
       # Include the enumerable module to simplify handling the items in this list.
       include Enumerable
       
-      # The items that appear in the list, i.e. an array of <tt>SQLTree::Node::Expression</tt>
+      # The items that appear in the list, i.e. an array of {SQLTree::Node::Expression}
       # instances.
       attr_accessor :items
+
+      def initialize(*items)
+        if items.length == 1 && items.first.kind_of?(Array)
+          @items = items.first
+        elsif items.length == 1 && items.first.kind_of?(Hash)
+          super(items.first)
+        else
+          @items
+        end
+      end
 
       # Generates an SQL fragment for this list.
       def to_sql
@@ -286,8 +302,13 @@ module SQLTree::Node
 
       # Parses a list of expresison by parsing expressions as long as it sees
       # a comma that indicates the presence of a next expression.
-      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
-      #                   of <tt> SQLTree::Parser</tt>.
+      #
+      #   List -> LPAREN (Expression (COMMA Expression)*)? RPAREN
+      #
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @return [SQLTree::Node::Expression::List] The parsed list instance.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      # encountered during parsing.
       def self.parse(tokens)
         tokens.consume(SQLTree::Token::LPAREN)
         items = []
@@ -300,18 +321,18 @@ module SQLTree::Node
         end
         tokens.consume(SQLTree::Token::RPAREN)
 
-        self.new(:items => items)
+        self.new(items)
       end
     end
     
     # Represents a SQL function call expression. This node has two child nodes:
     # <tt>function</tt> and <tt>argument_list</tt>.
-    class FunctionCall < self
+    class FunctionCall  < SQLTree::Node::Expression
 
       # The name of the function that is called as <tt>String</tt>.
       attr_accessor :function
       
-      # Th argument list as <tt>SQLTree::Node::Expression::List</tt> instance.
+      # Th argument list as {SQLTree::Node::Expression::List} instance.
       attr_accessor :argument_list
 
       # Generates an SQL fragment for this function call.
@@ -323,10 +344,14 @@ module SQLTree::Node
         self.class == other.class && self.function == other.function && self.argument_list == other.argument_list
       end
 
-      # Parses a function call by first parsing the function name and than
-      # parsing the argument list.
-      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
-      #                   of <tt> SQLTree::Parser</tt>.
+      # Parses an SQL function call.
+      #
+      #   FunctionCall -> <identifier> List
+      #
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @return [SQLTree::Node::Expression::FunctionCall] The parsed function call instance.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      # encountered during parsing.      
       def self.parse(tokens)
         return self.new(:function => tokens.next.literal, 
             :argument_list => SQLTree::Node::Expression::List.parse(tokens))
@@ -343,7 +368,7 @@ module SQLTree::Node
     #   <tt>Time</tt> or <tt>DateTime</tt> instance.
     # * an integer or decimal value, which is represented by an appropriate 
     #   <tt>Numeric</tt> instance.
-    class Value < self
+    class Value  < SQLTree::Node::Expression
       
       # The actual value this node represents.
       attr_accessor :value
@@ -354,8 +379,10 @@ module SQLTree::Node
       
       # Generates an SQL representation for this value.
       #
-      # This method will make sure that the value is quoted correctly, so
-      # that the resulting SQL query can be executed safely.
+      # This method supports nil, string, numeric, date and time values.
+      #
+      # @return [String] A correctly quoted value that can be used safely
+      # within an SQL query
       def to_sql
         case value
         when nil            then 'NULL'
@@ -372,8 +399,13 @@ module SQLTree::Node
       end
 
       # Parses a literal value.
-      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
-      #                   of <tt> SQLTree::Parser</tt>.
+      #
+      #   Value -> (NULL | <string> | <number>)
+      #
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @return [SQLTree::Node::Expression::Value] The parsed value instance.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      # encountered during parsing.
       def self.parse(tokens)
         case tokens.next
         when SQLTree::Token::String, SQLTree::Token::Number
@@ -388,8 +420,8 @@ module SQLTree::Node
     
     # Represents a variable within an SQL expression. This is a leaf node, so it
     # does not have any child nodes. A variale can point to a field of a table or 
-    # to another expresison that was declared elsewhere.
-    class Variable < self
+    # to another expression that was declared elsewhere.
+    class Variable  < SQLTree::Node::Expression
       
       # The name of the variable as <tt>String</tt>.
       attr_accessor :name
@@ -398,8 +430,10 @@ module SQLTree::Node
         @name = name
       end
 
-      # Generates a quoted reference to the variable that can be used in safely
-      # in SQL queries.
+      # Generates a quoted reference to the variable.
+      #
+      # @return [String] A correctly quoted variable that can be safely 
+      # used in SQL queries
       def to_sql
         quote_var(@name)
       end
@@ -409,8 +443,13 @@ module SQLTree::Node
       end
 
       # Parses an SQL variable.
-      # <tt>tokens</tt>:: The token stream to parse from, which is an instance
-      #                   of <tt> SQLTree::Parser</tt>.
+      #
+      #   Variable -> <identifier>
+      #
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @return [SQLTree::Node::Expression::Variable] The parsed variable instance.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      # encountered during parsing.
       def self.parse(tokens)
         if SQLTree::Token::Identifier === tokens.peek
           self.new(tokens.next.literal)
@@ -420,31 +459,49 @@ module SQLTree::Node
       end
     end
     
+    # Represents a reference to a field of a table in an SQL expression.
+    # This is a leaf node, which means that it does not have any child nodes.
     class Field < Variable
 
-      attr_accessor :name, :table
+      # The table in which the field resides. This can be +nil+, in which case
+      # the table the field belongs to is inferred from the rest of the query.
+      attr_accessor :table
+      
+      # The name of the field.
+      attr_accessor :name
 
       alias :field :name
       alias :field= :name=
 
+      # Initializes a new Field
       def initialize(name, table = nil)
         @name = name
         @table = table
       end
 
+      # Generates a correctly quoted reference to the field, which can
+      # be incorporated safely into an SQL query.
       def to_sql
         @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
       end
 
-      def ==(other)
+      def ==(other) # :nodoc:
         other.class == self.class && other.name == self.name && other.table == self.table
       end
 
+      # Parses a field, either with or without the table reference.
+      #
+      #   Field -> (<identifier> DOT)? <identifier>
+      #
+      # @param [SQLTree::Parser] tokens The token stream to parse from.
+      # @return [SQLTree::Node::Expression::Field] The parsed field instance.
+      # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
+      # encountered during parsing.
       def self.parse(tokens)
-        field_or_table = case tokens.next
-          when SQLTree::Token::MULTIPLY then :all
-          when SQLTree::Token::Identifier then tokens.current.literal
-          else raise SQLTree::Parser::UnexpectedToken.new(tokens.current)
+        if SQLTree::Token::Identifier === tokens.peek
+          field_or_table = tokens.next.literal
+        else
+          raise SQLTree::Parser::UnexpectedToken.new(tokens.next)
         end
 
         if SQLTree::Token::DOT === tokens.peek
