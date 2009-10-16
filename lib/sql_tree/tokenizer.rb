@@ -84,6 +84,7 @@ class SQLTree::Tokenizer
   # This method is aliased to <tt>:each</tt> to make the Enumerable
   # methods work on this method.
   def each_token(&block) # :yields: SQLTree::Token
+    
     while next_char
       case current_char
       when /^\s?$/;        # whitespace, go to next character
@@ -93,9 +94,9 @@ class SQLTree::Tokenizer
       when ',';            handle_token(SQLTree::Token::COMMA, &block)
       when /\d/;           tokenize_number(&block)
       when "'";            tokenize_quoted_string(&block)
-      when OPERATOR_CHARS; tokenize_operator(&block)
       when /\w/;           tokenize_keyword(&block)
-      when '"';            tokenize_quoted_variable(&block)     # TODO: allow MySQL quoting mode
+      when OPERATOR_CHARS; tokenize_operator(&block)
+      when SQLTree.identifier_quote_char; tokenize_quoted_identifier(&block)
       end
     end
 
@@ -154,9 +155,9 @@ class SQLTree::Tokenizer
   #
   # The actual quote character that is used depends on the DBMS. For now,
   # only the more standard double quote is accepted.
-  def tokenize_quoted_variable(&block) # :yields: SQLTree::Token::Identifier
+  def tokenize_quoted_identifier(&block) # :yields: SQLTree::Token::Identifier
     variable = ''
-    until next_char.nil? || current_char == '"' # TODO: allow MySQL quoting mode
+    until next_char.nil? || current_char == SQLTree.identifier_quote_char # TODO: allow MySQL quoting mode
       variable << (current_char == "\\" ? next_char : current_char)
     end
     handle_token(SQLTree::Token::Identifier.new(variable), &block)

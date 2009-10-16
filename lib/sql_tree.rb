@@ -5,6 +5,14 @@
 # necessary files for the gem to function properly.
 module SQLTree
 
+  class << self
+    # The character to quote variable names with.
+    attr_accessor :identifier_quote_char
+  end
+  
+  # Set default quote characters
+  self.identifier_quote_char = '"'
+    
   # Loads constants in the SQLTree namespace using self.load_default_class_file(base, const)
   # <tt>const</tt>:: The constant that is not yet loaded in the SQLTree namespace. This should be passed as a string or symbol.
   def self.const_missing(const)

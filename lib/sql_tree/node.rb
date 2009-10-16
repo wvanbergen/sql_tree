@@ -27,13 +27,13 @@ module SQLTree::Node
     # SQL queries.
     # <tt>name</tt>:: The name of the variable to quote.
     def quote_var(name)
-      "\"#{name}\"" # TODO: MySQL style variable quoting
+      "#{SQLTree.identifier_quote_char}#{name}#{SQLTree.identifier_quote_char}" # TODO: MySQL style variable quoting
     end
 
     # Quotes a string so that it can be used safey within an SQL query.
     # <tt>str</tt>:: The string to quote.
     def quote_str(str)
-      "'#{str.gsub(/\'/, "''")}'"
+      "'#{str.gsub("'", "''")}'"
     end
 
     # Parses an SQL fragment tree from a stream of tokens.

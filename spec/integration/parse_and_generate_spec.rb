@@ -2,8 +2,16 @@ require "#{File.dirname(__FILE__)}/../spec_helper"
 
 describe SQLTree, 'parsing and generating SQL' do
 
+  before(:each) { SQLTree.identifier_quote_char = '"' }
+
   it "should parse an generate q query without FROM" do
     SQLTree['SELECT 1'].to_sql.should == 'SELECT 1'
+  end
+  
+  it "should parse and generate MySQL type identifier quotes" do
+    SQLTree.identifier_quote_char = "`"
+    SQLTree['SELECT `field` FROM `table`'].to_sql.should == 
+            'SELECT `field` FROM `table`'
   end
 
   it "should parse and generate SQL fo a simple list query" do
