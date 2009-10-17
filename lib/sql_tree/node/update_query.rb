@@ -6,15 +6,15 @@ module SQLTree::Node
   class UpdateQuery < Base
     
     # The table ({SQLTree::Node::TableReference}) to update.
-    attr_accessor :table
+    child :table
     
     # The updates to do in the table. This is an array of 
     # {SQLTree::Node::UpdateQuery::Assignment} instances.
-    attr_accessor :updates
+    child :updates
     
     # The {SQLTree::Node::Expression} instance that restricts the records that
     # should be updated.
-    attr_accessor :where
+    child :where
     
     def initialize(table, updates = [], where = nil)
       @table, @updates, @where = table, updates, where
@@ -64,11 +64,11 @@ module SQLTree::Node
     class Assignment < Base
     
       # The field ({SQLTree::Node::Expression::Field}) to update.
-      attr_accessor :field
+      child :field
     
       # A {SQLTree::Node::Expression} instance that is used to 
       # update the field with.
-      attr_accessor :expression
+      child :expression
     
       # Initializes a new assignment node.
       def initialize(field, expression = nil)

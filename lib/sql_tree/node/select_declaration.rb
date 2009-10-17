@@ -2,7 +2,8 @@ module SQLTree::Node
 
   class SelectDeclaration < Base
 
-    attr_accessor :expression, :variable
+    child :expression
+    leaf :variable
 
     def to_sql(options = {})
       sql = @expression.to_sql(options)
@@ -42,22 +43,14 @@ module SQLTree::Node
         return expr
       end
     end
-
-    def ==(other)
-      other.class == self.class && other.expression == self.expression && other.variable == self.variable
-    end
   end
 
   class AllFieldsDeclaration < Base
     
-    attr_reader :table
+    leaf :table
     
     def initialize(table = nil)
       @table = table
-    end
-    
-    def ==(other)
-      other.class == self.class && other.table == self.table
     end
     
     def to_sql(options = {})

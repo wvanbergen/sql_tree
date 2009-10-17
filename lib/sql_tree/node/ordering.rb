@@ -2,7 +2,8 @@ module SQLTree::Node
 
   class Ordering < Base
 
-    attr_accessor :expression, :direction
+    child :expression
+    leaf :direction
 
     def initialize(expression, direction = nil)
       @expression, @direction = expression, direction

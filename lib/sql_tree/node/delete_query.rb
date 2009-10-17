@@ -6,11 +6,11 @@ module SQLTree::Node
   class DeleteQuery < Base
 
     # The table (<tt>SQLTree::Node::TableReference</tt>) from which to delete records.
-    attr_accessor :table
+    child :table
     
     # The <tt>SQLTree::Node::Expression</tt> instance that defines what
     # nodes to delete.
-    attr_accessor :where
+    child :where
 
     # Initializes a new DeleteQuery instance.
     def initialize(table, where = nil)

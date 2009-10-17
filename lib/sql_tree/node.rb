@@ -20,7 +20,7 @@ module SQLTree::Node
 
     # Pretty prints this instance for inspection
     def inspect
-      "#{self.class.name}[#{self.to_sql(options)}]"
+      "#{self.class.name}[#{self.to_sql}]"
     end
 
     # Quotes a variable name so that it can be safely used within
@@ -36,6 +36,40 @@ module SQLTree::Node
       "'#{str.gsub("'", "''")}'"
     end
 
+    # Registers the children and leafs attributes in the subclass
+    def self.inherited(subclass)
+      class << subclass; attr_accessor :children, :leafs; end
+      subclass.children = []
+      subclass.leafs    = []
+    end
+    
+    # Adds another leaf to this node class.
+    def self.leaf(name)
+      self.leafs << name
+      self.send(:attr_accessor, name)
+    end
+    
+    # Adds another child to this node class.
+    def self.child(name)
+      self.children << name
+      self.send(:attr_accessor, name)
+    end
+    
+    # Compares this node with another node, returns true if the nodes are equal.
+    def ==(other)
+      other.kind_of?(self.class) && equal_children?(other) && equal_leafs?(other)
+    end
+    
+    # Returns true if all children of the current object and the other object are equal.
+    def equal_children?(other)
+      self.class.children.all? { |child| send(child) == other.send(child) }
+    end
+
+    # Returns true if all leaf values of the current object and the other object are equal.
+    def equal_leafs?(other)
+      self.class.leafs.all? { |leaf| send(leaf) == other.send(leaf) }
+    end
+    
     # Parses an SQL fragment tree from a stream of tokens.
     #
     # This method should be implemented by each subclass.

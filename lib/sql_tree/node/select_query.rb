@@ -2,7 +2,14 @@ module SQLTree::Node
 
   class SelectQuery < Base
 
-    attr_accessor :distinct, :select, :from, :where, :group_by, :having, :order_by, :limit
+    leaf :distinct
+    child :select
+    child :from
+    child :where
+    child :group_by
+    child :having
+    child :order_by
+    child :limit
 
     def initialize
       @distinct = false

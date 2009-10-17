@@ -65,26 +65,21 @@ module SQLTree::Node
       TOKENS = [SQLTree::Token::NOT]
       
       # The SQL operator as <tt>String</tt> that was used for this expression.
-      attr_accessor :operator
+      leaf :operator
       
       # The right hand side of the prefix expression, i.e. the <tt>SQLTree::Node::Expression</tt>
       # instance that appeared after the operator.
-      attr_accessor :rhs
+      child :rhs
       
       # Generates an SQL fragment for this prefix operator expression.
       def to_sql(options = {})
-        "#{operator.upcase} #{rhs.to_sql(options)}"
-      end
-      
-      def ==(other) # :nodoc:
-        self.class == other.class && self.rhs == other.rhs &&
-          self.operator.upcase == other.operator.upcase
+        "#{operator} #{rhs.to_sql(options)}"
       end
       
       # Parses the operator from the token stream.
       # <tt>tokens</tt>:: the token stream to parse from.
       def self.parse_operator(tokens)
-        tokens.next.literal
+        tokens.next.literal.upcase
       end
       
       # Parses a prefix operator expression, by first parsing the operator
@@ -113,15 +108,11 @@ module SQLTree::Node
       
       # The left-hand side <tt>SQLTree::Node::Expression</tt> instance that was parsed
       # before the postfix operator.
-      attr_accessor :lhs
+      child :lhs
       
       # The postfoix operator for this expression as <tt>String</tt>.
-      attr_accessor :operator
-      
-      def ==(other) # :nodoc:
-        self.class == other.class && self.operator == other.operator && self.lhs == other.lhs
-      end
-      
+      leaf :operator
+            
       # Generates an SQL fragment for this postfix operator expression.
       def to_sql(options = {})
         "#{lhs.to_sql(options)} #{operator}"
@@ -166,24 +157,19 @@ module SQLTree::Node
       TOKENS = TOKEN_PRECEDENCE.flatten
       
       # The operator to use for this binary operator expression.
-      attr_accessor :operator
+      leaf :operator
       
       # The left hand side <tt>SQLTree::Node::Expression</tt> instance for this operator.
-      attr_accessor :lhs
+      child :lhs
       
       # The rights hand side <tt>SQLTree::Node::Expression</tt> instance for this operator.
-      attr_accessor :rhs
+      child :rhs
       
       # Generates an SQL fragment for this exression.
       def to_sql(options = {})
         "(#{lhs.to_sql(options)} #{operator} #{rhs.to_sql(options)})"
       end
-      
-      def ==(other) # :nodoc:
-        self.class == other.class && self.operator == other.operator &&
-          self.lhs == other.lhs && self.rhs == other.rhs
-      end
-      
+
       # Parses the operator for this expression. 
       #  
       # Some operators can be negated using the NOT operator (e.g. <tt>IS NOT</tt>, 
@@ -269,7 +255,7 @@ module SQLTree::Node
       
       # The items that appear in the list, i.e. an array of {SQLTree::Node::Expression}
       # instances.
-      attr_accessor :items
+      child :items
 
       def initialize(*items)
         if items.length == 1 && items.first.kind_of?(Array)
@@ -284,10 +270,6 @@ module SQLTree::Node
       # Generates an SQL fragment for this list.
       def to_sql(options = {})
         "(#{items.map {|i| i.to_sql(options)}.join(', ')})"
-      end
-      
-      def ==(other) # :nodoc:
-        self.class == other.clss && self.items == oher.items
       end
 
       # Returns true if this list has no items.
@@ -330,20 +312,16 @@ module SQLTree::Node
     class FunctionCall  < SQLTree::Node::Expression
 
       # The name of the function that is called as <tt>String</tt>.
-      attr_accessor :function
+      leaf :function
       
-      # Th argument list as {SQLTree::Node::Expression::List} instance.
-      attr_accessor :argument_list
+      # The argument list as {SQLTree::Node::Expression::List} instance.
+      child :argument_list
 
       # Generates an SQL fragment for this function call.
       def to_sql(options = {})
         "#{function}(" + argument_list.items.map { |e| e.to_sql(options) }.join(', ') + ")"
       end
       
-      def ==(other) # :nodoc:
-        self.class == other.class && self.function == other.function && self.argument_list == other.argument_list
-      end
-
       # Parses an SQL function call.
       #
       #   FunctionCall -> <identifier> List
@@ -371,7 +349,7 @@ module SQLTree::Node
     class Value  < SQLTree::Node::Expression
       
       # The actual value this node represents.
-      attr_accessor :value
+      leaf :value
 
       def initialize(value) # :nodoc:
         @value = value
@@ -392,10 +370,6 @@ module SQLTree::Node
         when DateTime, Time then @value.strftime("'%Y-%m-%d %H:%M:%S'")
         else raise "Don't know how te represent this value in SQL!"
         end
-      end
-
-      def ==(other) # :nodoc:
-        other.kind_of?(self.class) && other.value == self.value
       end
 
       # Parses a literal value.
@@ -424,7 +398,7 @@ module SQLTree::Node
     class Variable  < SQLTree::Node::Expression
       
       # The name of the variable as <tt>String</tt>.
-      attr_accessor :name
+      leaf :name
 
       def initialize(name) # :nodoc:
         @name = name
@@ -436,10 +410,6 @@ module SQLTree::Node
       # used in SQL queries
       def to_sql(options = {})
         quote_var(@name)
-      end
-
-      def ==(other) # :nodoc:
-        other.class == self.class && other.name == self.name
       end
 
       # Parses an SQL variable.
@@ -465,10 +435,10 @@ module SQLTree::Node
 
       # The table in which the field resides. This can be +nil+, in which case
       # the table the field belongs to is inferred from the rest of the query.
-      attr_accessor :table
+      leaf :table
       
       # The name of the field.
-      attr_accessor :name
+      leaf :name
 
       alias :field :name
       alias :field= :name=
@@ -483,10 +453,6 @@ module SQLTree::Node
       # be incorporated safely into an SQL query.
       def to_sql(options = {})
         @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
-      end
-
-      def ==(other) # :nodoc:
-        other.class == self.class && other.name == self.name && other.table == self.table
       end
 
       # Parses a field, either with or without the table reference.

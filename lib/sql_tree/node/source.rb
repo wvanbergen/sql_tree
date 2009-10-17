@@ -2,7 +2,8 @@ module SQLTree::Node
 
   class Source < Base
 
-    attr_accessor :table_reference, :joins
+    child :table_reference
+    child :joins
 
     def initialize(table_reference, joins = [])
       @table_reference, @joins = table_reference, joins
@@ -20,10 +21,6 @@ module SQLTree::Node
       sql = table_reference.to_sql(options)
       sql << ' ' << joins.map { |j| j.to_sql(options) }.join(' ') if joins.any?
       return sql
-    end
-
-    def ==(other)
-      other.table_reference = self.table_reference && other.joins == self.joins
     end
 
     def self.parse(tokens)

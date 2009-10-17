@@ -2,7 +2,9 @@ module SQLTree::Node
 
   class Join < Base
 
-    attr_accessor :join_type, :table_reference, :join_expression
+    leaf :join_type
+    child :table_reference
+    child :join_expression
 
     def initialize(values = {})
       values.each { |key, value| self.send(:"#{key}=", value) }
@@ -39,11 +41,6 @@ module SQLTree::Node
       join.join_expression = SQLTree::Node::Expression.parse(tokens)
 
       return join
-    end
-
-    def ==(other)
-      other.table = self.table && other.table_alias == self.table_alias &&
-        other.join_type == self.join_type && other.join_expression == self.join_expression
     end
   end
 end

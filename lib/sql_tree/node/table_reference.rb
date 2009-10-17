@@ -2,7 +2,8 @@ module SQLTree::Node
 
   class TableReference < Base
 
-    attr_accessor :table, :table_alias
+    leaf :table
+    leaf :table_alias
 
     def initialize(table, table_alias = nil)
       @table, @table_alias = table, table_alias
@@ -12,10 +13,6 @@ module SQLTree::Node
       sql = quote_var(table)
       sql << " AS " << quote_var(table_alias) if table_alias
       return sql
-    end
-
-    def ==(other)
-      other.class == self.class && other.table == self.table && other.table_alias == self.table_alias
     end
 
     def self.parse(tokens)

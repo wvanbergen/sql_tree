@@ -2,7 +2,11 @@ module SQLTree::Node
 
   class InsertQuery < Base
 
-    attr_accessor :table, :fields, :values
+    child :table
+    
+    child :fields
+    
+    child :values
 
     def initialize(table, fields = nil, values = [])
       @table, @fields, @values  = table, fields, values
