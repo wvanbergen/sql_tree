@@ -81,6 +81,15 @@ module SQLTree::Node
     def self.parse(tokens)
       raise 'Only implemented in subclasses!'
     end
+    
+    def self.parse_list(tokens, item_class = SQLTree::Node::Expression)
+      items = [item_class.parse(tokens)]
+      while SQLTree::Token::COMMA === tokens.peek
+        tokens.consume(SQLTree::Token::COMMA)
+        items << item_class.parse(tokens)
+      end
+      return items
+    end
 
     # Parses a string, expecting it to be parsable to an instance of
     # the current class.

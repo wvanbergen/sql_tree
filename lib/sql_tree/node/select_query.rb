@@ -38,7 +38,7 @@ module SQLTree::Node
         select_node.distinct = true
       end
 
-      select_node.select   = self.parse_select_clause(tokens)
+      select_node.select   = parse_list(tokens, SQLTree::Node::SelectDeclaration)
       select_node.from     = self.parse_from_clause(tokens)   if SQLTree::Token::FROM === tokens.peek
       select_node.where    = self.parse_where_clause(tokens)  if SQLTree::Token::WHERE === tokens.peek
       if SQLTree::Token::GROUP === tokens.peek
@@ -49,23 +49,9 @@ module SQLTree::Node
       return select_node
     end
 
-    def self.parse_select_clause(tokens)
-      expressions = [SQLTree::Node::SelectDeclaration.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        expressions << SQLTree::Node::SelectDeclaration.parse(tokens)
-      end
-      return expressions
-    end
-
     def self.parse_from_clause(tokens)
       tokens.consume(SQLTree::Token::FROM)
-      sources = [SQLTree::Node::Source.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        sources << SQLTree::Node::Source.parse(tokens)
-      end
-      return sources
+      parse_list(tokens, SQLTree::Node::Source)
     end
 
     def self.parse_where_clause(tokens)
@@ -74,14 +60,8 @@ module SQLTree::Node
     end
 
     def self.parse_group_clause(tokens)
-      tokens.consume(SQLTree::Token::GROUP)
-      tokens.consume(SQLTree::Token::BY)
-      exprs = [SQLTree::Node::Expression.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        exprs << SQLTree::Node::Expression.parse(tokens)
-      end
-      return exprs
+      tokens.consume(SQLTree::Token::GROUP, SQLTree::Token::BY)
+      parse_list(tokens)
     end
 
     def self.parse_having_clause(tokens)
@@ -90,14 +70,8 @@ module SQLTree::Node
     end
 
     def self.parse_order_clause(tokens)
-      tokens.consume(SQLTree::Token::ORDER)
-      tokens.consume(SQLTree::Token::BY)
-      exprs = [SQLTree::Node::Ordering.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        exprs << SQLTree::Node::Ordering.parse(tokens)
-      end
-      return exprs
+      tokens.consume(SQLTree::Token::ORDER, SQLTree::Token::BY)
+      parse_list(tokens, SQLTree::Node::Ordering)
     end
 
     def self.parse_limit_clause(tokens)

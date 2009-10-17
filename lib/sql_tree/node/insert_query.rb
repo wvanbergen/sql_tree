@@ -21,11 +21,7 @@ module SQLTree::Node
     
     def self.parse_field_list(tokens)
       tokens.consume(SQLTree::Token::LPAREN)
-      fields = [SQLTree::Node::Expression::Field.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        fields << SQLTree::Node::Expression::Field.parse(tokens)
-      end
+      fields = parse_list(tokens, SQLTree::Node::Expression::Field)
       tokens.consume(SQLTree::Token::RPAREN)
       return fields
     end
@@ -33,11 +29,7 @@ module SQLTree::Node
     def self.parse_value_list(tokens)
       tokens.consume(SQLTree::Token::VALUES)
       tokens.consume(SQLTree::Token::LPAREN)
-      values = [SQLTree::Node::Expression.parse(tokens)]
-      while SQLTree::Token::COMMA === tokens.peek
-        tokens.consume(SQLTree::Token::COMMA)
-        values << SQLTree::Node::Expression.parse(tokens)
-      end
+      values = parse_list(tokens)
       tokens.consume(SQLTree::Token::RPAREN)
       return values
     end

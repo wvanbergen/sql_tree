@@ -295,14 +295,9 @@ module SQLTree::Node
         tokens.consume(SQLTree::Token::LPAREN)
         items = []
         unless SQLTree::Token::RPAREN === tokens.peek
-          items << SQLTree::Node::Expression.parse(tokens)
-          while SQLTree::Token::COMMA === tokens.peek
-            tokens.consume(SQLTree::Token::COMMA)
-            items << SQLTree::Node::Expression.parse(tokens)
-          end
+          items = self.parse_list(tokens, SQLTree::Node::Expression)
         end
         tokens.consume(SQLTree::Token::RPAREN)
-
         self.new(items)
       end
     end
@@ -315,11 +310,11 @@ module SQLTree::Node
       leaf :function
       
       # The argument list as {SQLTree::Node::Expression::List} instance.
-      child :argument_list
+      child :arguments
 
       # Generates an SQL fragment for this function call.
       def to_sql(options = {})
-        "#{function}(" + argument_list.items.map { |e| e.to_sql(options) }.join(', ') + ")"
+        "#{function}(" + arguments.map { |e| e.to_sql(options) }.join(', ') + ")"
       end
       
       # Parses an SQL function call.
@@ -331,8 +326,11 @@ module SQLTree::Node
       # @raise [SQLTree::Parser::UnexpectedToken] if an unexpected token is
       # encountered during parsing.      
       def self.parse(tokens)
-        return self.new(:function => tokens.next.literal, 
-            :argument_list => SQLTree::Node::Expression::List.parse(tokens))
+        function_call = self.new(:function => tokens.next.literal, :arguments => [])
+        tokens.consume(SQLTree::Token::LPAREN)
+        function_call.arguments = self.parse_list(tokens) unless SQLTree::Token::RPAREN === tokens.peek
+        tokens.consume(SQLTree::Token::RPAREN)
+        return function_call
       end
     end
     
