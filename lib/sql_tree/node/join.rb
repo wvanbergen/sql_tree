@@ -8,10 +8,10 @@ module SQLTree::Node
       values.each { |key, value| self.send(:"#{key}=", value) }
     end
 
-    def to_sql
+    def to_sql(options = {})
       join_sql = join_type ? "#{join_type.to_s.upcase} " : ""
-      join_sql << "JOIN #{table_reference.to_sql} "
-      join_sql << "ON #{join_expression.to_sql}"
+      join_sql << "JOIN #{table_reference.to_sql(options)} "
+      join_sql << "ON #{join_expression.to_sql(options)}"
       join_sql
     end
 

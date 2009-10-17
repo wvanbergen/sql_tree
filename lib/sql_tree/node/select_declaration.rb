@@ -4,8 +4,8 @@ module SQLTree::Node
 
     attr_accessor :expression, :variable
 
-    def to_sql
-      sql = @expression.to_sql
+    def to_sql(options = {})
+      sql = @expression.to_sql(options)
       sql << " AS " << quote_var(@variable) if @variable
       return sql
     end
@@ -60,7 +60,7 @@ module SQLTree::Node
       other.class == self.class && other.table == self.table
     end
     
-    def to_sql
+    def to_sql(options = {})
       table ? "#{quote_var(table)}.*" : '*'
     end
   end

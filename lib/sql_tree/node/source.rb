@@ -16,9 +16,9 @@ module SQLTree::Node
       table_reference.table_alias
     end
 
-    def to_sql
-      sql = table_reference.to_sql
-      sql << ' ' << joins.map { |j| j.to_sql }.join(' ') if joins.any?
+    def to_sql(options = {})
+      sql = table_reference.to_sql(options)
+      sql << ' ' << joins.map { |j| j.to_sql(options) }.join(' ') if joins.any?
       return sql
     end
 

@@ -8,8 +8,8 @@ module SQLTree::Node
       @expression, @direction = expression, direction
     end
 
-    def to_sql
-      sql = expression.to_sql
+    def to_sql(options = {})
+      sql = expression.to_sql(options)
       sql << " #{direction.to_s.upcase}" if direction
       sql
     end

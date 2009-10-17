@@ -8,10 +8,10 @@ module SQLTree::Node
       @table, @fields, @values  = table, fields, values
     end
 
-    def to_sql
-      sql = "INSERT INTO #{table.to_sql} "
-      sql << '(' + fields.map { |f| f.to_sql }.join(', ') + ') ' if fields
-      sql << 'VALUES (' + values.map { |v| v.to_sql }.join(', ') + ')'
+    def to_sql(options = {})
+      sql = "INSERT INTO #{table.to_sql(options)} "
+      sql << '(' + fields.map { |f| f.to_sql(options) }.join(', ') + ') ' if fields
+      sql << 'VALUES (' + values.map { |v| v.to_sql(options) }.join(', ') + ')'
       sql
     end
     

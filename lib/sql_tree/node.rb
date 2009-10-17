@@ -20,7 +20,7 @@ module SQLTree::Node
 
     # Pretty prints this instance for inspection
     def inspect
-      "#{self.class.name}[#{self.to_sql}]"
+      "#{self.class.name}[#{self.to_sql(options)}]"
     end
 
     # Quotes a variable name so that it can be safely used within

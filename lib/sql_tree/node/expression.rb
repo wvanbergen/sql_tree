@@ -72,8 +72,8 @@ module SQLTree::Node
       attr_accessor :rhs
       
       # Generates an SQL fragment for this prefix operator expression.
-      def to_sql
-        "#{operator.upcase} #{rhs.to_sql}"
+      def to_sql(options = {})
+        "#{operator.upcase} #{rhs.to_sql(options)}"
       end
       
       def ==(other) # :nodoc:
@@ -123,8 +123,8 @@ module SQLTree::Node
       end
       
       # Generates an SQL fragment for this postfix operator expression.
-      def to_sql
-        "#{lhs.to_sql} #{operator}"
+      def to_sql(options = {})
+        "#{lhs.to_sql(options)} #{operator}"
       end
       
       # Parses a postfix operator expression. This method is not yet implemented.
@@ -175,8 +175,8 @@ module SQLTree::Node
       attr_accessor :rhs
       
       # Generates an SQL fragment for this exression.
-      def to_sql
-        "(#{lhs.to_sql} #{operator} #{rhs.to_sql})"
+      def to_sql(options = {})
+        "(#{lhs.to_sql(options)} #{operator} #{rhs.to_sql(options)})"
       end
       
       def ==(other) # :nodoc:
@@ -282,8 +282,8 @@ module SQLTree::Node
       end
 
       # Generates an SQL fragment for this list.
-      def to_sql
-        "(#{items.map {|i| i.to_sql}.join(', ')})"
+      def to_sql(options = {})
+        "(#{items.map {|i| i.to_sql(options)}.join(', ')})"
       end
       
       def ==(other) # :nodoc:
@@ -336,8 +336,8 @@ module SQLTree::Node
       attr_accessor :argument_list
 
       # Generates an SQL fragment for this function call.
-      def to_sql
-        "#{function}(" + argument_list.items.map { |e| e.to_sql }.join(', ') + ")"
+      def to_sql(options = {})
+        "#{function}(" + argument_list.items.map { |e| e.to_sql(options) }.join(', ') + ")"
       end
       
       def ==(other) # :nodoc:
@@ -383,7 +383,7 @@ module SQLTree::Node
       #
       # @return [String] A correctly quoted value that can be used safely
       # within an SQL query
-      def to_sql
+      def to_sql(options = {})
         case value
         when nil            then 'NULL'
         when String         then quote_str(@value)
@@ -434,7 +434,7 @@ module SQLTree::Node
       #
       # @return [String] A correctly quoted variable that can be safely 
       # used in SQL queries
-      def to_sql
+      def to_sql(options = {})
         quote_var(@name)
       end
 
@@ -481,7 +481,7 @@ module SQLTree::Node
 
       # Generates a correctly quoted reference to the field, which can
       # be incorporated safely into an SQL query.
-      def to_sql
+      def to_sql(options = {})
         @table.nil? ? quote_var(@name) : quote_var(@table) + '.' + quote_var(@name)
       end
 

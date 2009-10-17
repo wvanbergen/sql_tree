@@ -8,7 +8,7 @@ module SQLTree::Node
       @table, @table_alias = table, table_alias
     end
 
-    def to_sql
+    def to_sql(options = {})
       sql = quote_var(table)
       sql << " AS " << quote_var(table_alias) if table_alias
       return sql

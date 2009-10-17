@@ -18,9 +18,9 @@ module SQLTree::Node
     end
 
     # Generates an SQL DELETE query from this node.
-    def to_sql
-      sql = "DELETE FROM #{table.to_sql}"
-      sql << " WHERE #{where.to_sql}" if self.where
+    def to_sql(options = {})
+      sql = "DELETE FROM #{table.to_sql(options)}"
+      sql << " WHERE #{where.to_sql(options)}" if self.where
       sql
     end
     

@@ -9,15 +9,15 @@ module SQLTree::Node
       @select   = []
     end
 
-    def to_sql
+    def to_sql(options = {})
       raise "At least one SELECT expression is required" if self.select.empty?
       sql = (self.distinct) ? "SELECT DISTINCT " : "SELECT "
-      sql << select.map { |s| s.to_sql }.join(', ')
-      sql << " FROM "     << from.map { |f| f.to_sql }.join(', ') if from
-      sql << " WHERE "    << where.to_sql if where
-      sql << " GROUP BY " << group_by.map { |g| g.to_sql }.join(', ') if group_by
-      sql << " ORDER BY " << order_by.map { |o| o.to_sql }.join(', ') if order_by
-      sql << " HAVING "   << having.to_sql if having
+      sql << select.map { |s| s.to_sql(options) }.join(', ')
+      sql << " FROM "     << from.map { |f| f.to_sql(options) }.join(', ') if from
+      sql << " WHERE "    << where.to_sql(options) if where
+      sql << " GROUP BY " << group_by.map { |g| g.to_sql(options) }.join(', ') if group_by
+      sql << " ORDER BY " << order_by.map { |o| o.to_sql(options) }.join(', ') if order_by
+      sql << " HAVING "   << having.to_sql(options) if having
       return sql
     end
 

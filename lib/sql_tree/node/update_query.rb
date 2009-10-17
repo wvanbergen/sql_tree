@@ -22,10 +22,10 @@ module SQLTree::Node
     
     # Generates the SQL UPDATE query.
     # @return [String] The SQL update query
-    def to_sql
-      sql = "UPDATE #{table.to_sql} SET "
-      sql << updates.map { |u| u.to_sql }.join(', ')
-      sql << " WHERE " << where.to_sql if self.where
+    def to_sql(options = {})
+      sql = "UPDATE #{table.to_sql(options)} SET "
+      sql << updates.map { |u| u.to_sql(options) }.join(', ')
+      sql << " WHERE " << where.to_sql(options) if self.where
       sql
     end
     
@@ -78,8 +78,8 @@ module SQLTree::Node
       # Generates an SQL fragment for this node.
       # @return [String] An SQL fragment that can be embedded in the SET
       #    clause of on SQL UPDATE query.
-      def to_sql
-        "#{field.to_sql} = #{expression.to_sql}"
+      def to_sql(options = {})
+        "#{field.to_sql(options)} = #{expression.to_sql(options)}"
       end
     
       # Parses an Assignment node from a stream of tokens. Syntax:
