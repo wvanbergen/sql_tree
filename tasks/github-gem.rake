@@ -1,4 +1,7 @@
 require 'rubygems'
+require 'bundler'
+Bundler.require(:default, :rake)
+
 require 'rake'
 require 'rake/tasklib'
 require 'date'
