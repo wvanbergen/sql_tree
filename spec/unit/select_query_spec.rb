@@ -73,6 +73,10 @@ describe SQLTree::Node::Join do
   it "should parse a table alias without AS" do
     SQLTree::Node::Join['LEFT JOIN table t ON other.field = table.field'].table_alias.should == 't'
   end
+
+  it "should parse an outer join table" do
+    SQLTree::Node::Join['LEFT OUTER JOIN table ON other.field = table.field'].table.should == 'table'
+  end
 end
 
 describe SQLTree::Node::Ordering do
