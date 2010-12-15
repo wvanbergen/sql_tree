@@ -94,6 +94,7 @@ class SQLTree::Tokenizer
       when ',';            handle_token(SQLTree::Token::COMMA, &block)
       when /\d/;           tokenize_number(&block)
       when "'";            tokenize_quoted_string(&block)
+      when 'E';            tokenize_possible_escaped_string(&block)
       when /\w/;           tokenize_keyword(&block)
       when OPERATOR_CHARS; tokenize_operator(&block)
       when SQLTree.identifier_quote_char; tokenize_quoted_identifier(&block)
@@ -105,6 +106,17 @@ class SQLTree::Tokenizer
   end
 
   alias :each :each_token
+
+  # Tokenizes a something that could be a 'postgresql'-styled string (e.g.
+  # E'foobar'). If the very next char isn't a single quote, then it falls back
+  # to tokenizing a keyword.
+  def tokenize_possible_escaped_string(&block)
+    if peek_char == "'"
+      handle_token(SQLTree::Token::STRING_ESCAPE, &block)
+    else
+      tokenize_keyword(&block)
+    end
+  end
 
   # Tokenizes a eyword in the code. This can either be a reserved SQL keyword
   # or a variable. This method will yield variables directly. Keywords will be

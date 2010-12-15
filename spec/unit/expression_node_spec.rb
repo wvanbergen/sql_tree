@@ -19,6 +19,16 @@ describe SQLTree::Node::Expression do
       function.arguments.should == [SQLTree::Node::Expression::Value.new('string')]
     end
 
+    it "shoud parse an escaped string correctly" do
+      string = SQLTree::Node::Expression["E'string'"]
+      string.should == SQLTree::Node::Expression::Value.new("string")
+    end
+
+    it "should parse a postgresql interval expression correctly" do
+      interval = SQLTree::Node::Expression["interval '2 hours'"]
+      interval.value.should == "2 hours"
+    end
+
     it "should parse a logical OR expression correctly" do
       logical = SQLTree::Node::Expression["'this' OR 'that"]
       logical.operator.should == 'OR'

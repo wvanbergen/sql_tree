@@ -80,4 +80,23 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree['UPDATE  table  SET  field1  = 123 WHERE   id  = 17'].to_sql.should ==
             'UPDATE "table" SET "field1" = 123 WHERE ("id" = 17)'
   end
+
+  it "should parse and generate a SET query" do
+    SQLTree["SET client_min_messages TO 'panic'"].to_sql.should ==
+            "SET \"client_min_messages\" TO 'panic'"
+  end
+
+  it "should parse and generate a BEGIN statement" do
+    SQLTree["BEGIN"].to_sql.should == "BEGIN"
+  end
+
+  it "should parse and generate a COMMIT statement" do
+    SQLTree["COMMIT"].to_sql.should == "COMMIT"
+  end
+
+  # TODO: make this work
+  # it "should parse and generate a SELECT query with a function that takes star as arg" do
+  #   SQLTree["SELECT count(*) FROM jobs"].to_sql.should ==
+  #     "SELECT count(*) FROM jobs"
+  # end
 end

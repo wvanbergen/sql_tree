@@ -11,6 +11,10 @@ describe SQLTree::Tokenizer do
       SQLTree::Tokenizer.tokenize('and').should tokenize_to(:and)
     end
 
+    it "should tokenize a begin SQL keyword" do
+      SQLTree::Tokenizer.tokenize('BEGIN').should tokenize_to(:begin)
+    end
+
     it "should tokenize muliple separate keywords" do
       SQLTree::Tokenizer.tokenize('SELECT DISTINCT').should tokenize_to(:select, :distinct)
     end
@@ -58,6 +62,14 @@ describe SQLTree::Tokenizer do
     it "should tokenize commas" do
       SQLTree::Tokenizer.tokenize('a , "b"').should tokenize_to(sql_var('a'), comma, sql_var('b'))
     end
+
+    it "should tokenize postgresql string escape token" do
+      SQLTree::Tokenizer.tokenize("E'foo'").should tokenize_to(:string_escape, "foo")
+    end
+
+    it "should tokenize postgresql interval statements" do
+      SQLTree::Tokenizer.tokenize("interval '2 days'").should tokenize_to(:interval, "2 days")
+    end
   end
 
   # # Combined tokens are disabled for now;
@@ -76,6 +88,10 @@ describe SQLTree::Tokenizer do
 
     it "should tokenize a function call" do
       SQLTree::Tokenizer.tokenize("MD5('test')").should tokenize_to(sql_var('MD5'), lparen, 'test', rparen)
+    end
+
+    it "should tokenize a posgresql SET call" do
+      SQLTree::Tokenizer.tokenize("SET client_min_messages TO 'panic'").should tokenize_to(:set, sql_var('client_min_messages'), :to, 'panic')
     end
   end
 

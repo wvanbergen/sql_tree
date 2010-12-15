@@ -49,6 +49,11 @@ module SQLTree::Node
         else
           Variable.parse(tokens)
         end
+      elsif SQLTree::Token::STRING_ESCAPE == tokens.peek
+        tokens.consume(SQLTree::Token::STRING_ESCAPE)
+        Value.parse(tokens)
+      elsif SQLTree::Token::INTERVAL === tokens.peek
+        IntervalValue.parse(tokens)
       else
         Value.parse(tokens)
       end
@@ -333,7 +338,35 @@ module SQLTree::Node
         return function_call
       end
     end
-    
+
+
+    # Represents a postgresql INTERVAL value. Example: interval '2 days'.
+    #
+    # The value is the literal text of the interval (e.g. "2 days").
+    class IntervalValue < SQLTree::Node::Expression
+      # The actual value this node represents.
+      leaf :value
+
+      def initialize(value) # :nodoc:
+        @value = value
+      end
+
+      # Generates an SQL representation for this value.
+      def to_sql(options = {})
+        "interval " + quote_str(@value)
+      end
+
+      def self.parse(tokens)
+        tokens.consume(SQLTree::Token::INTERVAL)
+        if SQLTree::Token::String === tokens.peek
+          self.new(tokens.next.literal)
+        else
+          raise SQLTree::Parser::UnexpectedToken.new(tokens.current, :literal)
+        end
+      end
+    end
+
+
     # Represents alitreal value in an SQL expression. This node is a leaf node
     # and thus has no child nodes.
     #
@@ -345,14 +378,14 @@ module SQLTree::Node
     # * an integer or decimal value, which is represented by an appropriate 
     #   <tt>Numeric</tt> instance.
     class Value  < SQLTree::Node::Expression
-      
+
       # The actual value this node represents.
       leaf :value
 
       def initialize(value) # :nodoc:
         @value = value
       end
-      
+
       # Generates an SQL representation for this value.
       #
       # This method supports nil, string, numeric, date and time values.
@@ -389,7 +422,7 @@ module SQLTree::Node
         end
       end
     end
-    
+
     # Represents a variable within an SQL expression. This is a leaf node, so it
     # does not have any child nodes. A variale can point to a field of a table or 
     # to another expression that was declared elsewhere.

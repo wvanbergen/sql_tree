@@ -140,10 +140,12 @@ class SQLTree::Token
   RPAREN = Class.new(SQLTree::Token).new(')')
   DOT    = Class.new(SQLTree::Token).new('.')
   COMMA  = Class.new(SQLTree::Token).new(',')
+  STRING_ESCAPE = Class.new(SQLTree::Token).new('E')
 
   # A list of all the SQL reserverd keywords.
   KEYWORDS = %w{SELECT FROM WHERE GROUP HAVING ORDER DISTINCT LEFT RIGHT INNER FULL OUTER NATURAL JOIN USING
-                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC INSERT INTO VALUES DELETE UPDATE SET}
+                AND OR NOT AS ON IS NULL BY LIKE ILIKE BETWEEN IN ASC DESC INSERT INTO VALUES DELETE UPDATE
+                SET BEGIN COMMIT TO INTERVAL}
 
   # Create a token for all the reserved keywords in SQL
   KEYWORDS.each { |kw| const_set(kw, Class.new(SQLTree::Token::Keyword)) }
