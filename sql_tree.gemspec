@@ -17,6 +17,9 @@ Gem::Specification.new do |s|
   s.email    = 'willem@vanbergen.org'
   s.homepage = 'http://wiki.github.com/wvanbergen/sql_tree'
 
+  s.add_development_dependency('rake')
+  s.add_development_dependency('rspec', '~> 2')
+
   s.rdoc_options << '--title' << s.name << '--main' << 'README.rdoc' << '--line-numbers' << '--inline-source'
   s.extra_rdoc_files = ['README.rdoc']
 

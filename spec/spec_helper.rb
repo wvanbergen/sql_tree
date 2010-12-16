@@ -1,26 +1,11 @@
-$:.reject! { |e| e.include? 'TextMate' }
-$: << File.join(File.dirname(__FILE__), '..', 'lib')
-
 require 'rubygems'
-require 'spec'
-require 'sql_tree'
+require 'bundler'
 
-module SQLTree::Spec
-  module NodeLoader
-    def self.const_missing(const)
-      SQLTree::Node.const_get(const)
-    end
-  end
+Bundler.require(:default)
 
-  module TokenLoader
-    def self.const_missing(const)
-      SQLTree::Token.const_get(const)
-    end
-  end
+# Load helper files.
+Dir[File.join(File.dirname(__FILE__), 'lib', '*.rb')].each { |f| require f }
+
+RSpec.configure do |config|
+  # Nothing special going on
 end
-
-Spec::Runner.configure do |config|
-
-end
-
-require "#{File.dirname(__FILE__)}/lib/matchers"
