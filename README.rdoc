@@ -12,9 +12,11 @@ yet stable and not all SQL constructs are implemented yet.
 
 == Installation
 
-The SQLTree library is distributed as a gem on Gemcutter.org. To install:
+The SQLTree library is distributed as a gem. To install:
 
-  gem install sql_tree --source http://gemcutter.org
+  gem install sql_tree
+  
+Or, add <tt>gem 'sql_tree'</tt> to your project's Gemfile and run <tt>bundle install</tt>.  
   
 == Usage
 
@@ -33,5 +35,5 @@ This library is written by Willem van Bergen and is MIT licensed (see the
 LICENSE file).
 
 * Full RDoc API documentation can be found at http://rdoc.info/projects/wvanbergen/sql_tree
-* See the project wiki at http://wiki.github.com/wvanbergen/sql_tree for more
+* See the project wiki at http://github.com/wvanbergen/sql_tree/wiki for more
   information about using this library.
