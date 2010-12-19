@@ -3,3 +3,4 @@
 /doc
 .bundle
 Gemfile.lock
+*.rbc
