@@ -1,7 +1,6 @@
 require 'rubygems'
-require 'bundler'
-
-Bundler.require(:default)
+require 'bundler/setup'
+require 'sql_tree'
 
 # Load helper files.
 require 'helpers/matchers'
