@@ -111,3 +111,31 @@ describe SQLTree::Node::Expression do
     end
   end
 end
+
+describe SQLTree::Node::SelectExpression do
+  describe '.parse' do
+    it "should parse a COUNT(*) call correctly" do
+      count = SQLTree::Node::SelectExpression["COUNT(*)"]
+      count.distinct.should be_false
+      count.expression.should == SQLTree::Node::ALL_FIELDS
+    end
+
+    it "should parse a COUNT(DISTINCT *) call correctly" do
+      count = SQLTree::Node::SelectExpression["COUNT(DISTINCT *)"]
+      count.distinct.should be_true
+      count.expression.should == SQLTree::Node::ALL_FIELDS
+    end
+
+    it "should parse a COUNT(DISTINCT(*)) call correctly" do
+      count = SQLTree::Node::SelectExpression["COUNT(DISTINCT(*))"]
+      count.distinct.should be_true
+      count.expression.should == SQLTree::Node::ALL_FIELDS
+    end
+    
+    it "should parse a COUNT(field) call correctly" do
+      count = SQLTree::Node::SelectExpression["COUNT(field)"]
+      count.distinct.should be_false
+      count.expression.should == SQLTree::Node::Expression['field']
+    end
+  end
+end
