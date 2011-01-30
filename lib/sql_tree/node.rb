@@ -1,11 +1,5 @@
 module SQLTree::Node
 
-  # Auto-loades files for Node subclasses that reside in the
-  # node directory, based on the classname.
-  def self.const_missing(const)
-    SQLTree.load_default_class_file(SQLTree::Node, const)
-  end
-
   # The SQLTree::Node::Base class is the superclass for all node
   # types that are used to represent SQL queries.
   #
@@ -106,3 +100,21 @@ module SQLTree::Node
     end
   end
 end
+
+require 'sql_tree/node/expression'
+
+require 'sql_tree/node/select_query'
+require 'sql_tree/node/select_declaration'
+require 'sql_tree/node/table_reference'
+require 'sql_tree/node/source'
+require 'sql_tree/node/join'
+require 'sql_tree/node/ordering'
+
+require 'sql_tree/node/insert_query'
+require 'sql_tree/node/update_query'
+require 'sql_tree/node/delete_query'
+require 'sql_tree/node/set_query'
+
+require 'sql_tree/node/begin_statement'
+require 'sql_tree/node/commit_statement'
+require 'sql_tree/node/rollback_statement'
