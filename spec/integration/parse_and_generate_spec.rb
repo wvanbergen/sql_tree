@@ -94,11 +94,14 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree["COMMIT"].to_sql.should == "COMMIT"
   end
 
-  # TODO: make this work
-  # it "should parse and generate a SELECT query with a function that takes star as arg" do
-  #   SQLTree["SELECT count(*) FROM jobs"].to_sql.should ==
-  #     "SELECT count(*) FROM jobs"
-  # end
+  it "should parse and generate a COMMIT statement" do
+    SQLTree["ROLLBACK"].to_sql.should == "ROLLBACK"
+  end
+
+  it "should parse and generate a SELECT query with a function that takes star as arg" do
+    SQLTree["SELECT count(*) FROM jobs"].to_sql.should ==
+      'SELECT COUNT(*) FROM "jobs"'
+  end
 
   it "should parse and generate a LEFT OUTER JOIN query" do
     SQLTree["SELECT * FROM table_a LEFT OUTER JOIN table_b ON foo = bar"].to_sql.should ==
