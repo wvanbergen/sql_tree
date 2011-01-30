@@ -94,7 +94,7 @@ describe SQLTree, 'parsing and generating SQL' do
     SQLTree["COMMIT"].to_sql.should == "COMMIT"
   end
 
-  it "should parse and generate a COMMIT statement" do
+  it "should parse and generate a ROLLBACK statement" do
     SQLTree["ROLLBACK"].to_sql.should == "ROLLBACK"
   end
 
