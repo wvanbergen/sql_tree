@@ -5,7 +5,7 @@
 # necessary files for the gem to function properly.
 module SQLTree
 
-  VERSION = "0.1.1"
+  VERSION = "0.2.0"
 
   class << self
     # The character to quote variable names with.
