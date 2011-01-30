@@ -3,10 +3,10 @@ class TokenizeTo
   def initialize(expected_tokens)
     @expected_tokens = expected_tokens.map do |t|
       case t
-        when SQLTree::Token then t
-        when String         then SQLTree::Token::String.new(t)
-        when Numeric        then SQLTree::Token::Number.new(t)
-        when Symbol         then SQLTree::Token.const_get(t.to_s.upcase)
+        when SQLTree::Token; t
+        when String;         SQLTree::Token::String.new(t)
+        when Numeric;        SQLTree::Token::Number.new(t)
+        when Symbol;         SQLTree::Token.const_get(t.to_s.upcase)
         else "Cannot check for this token: #{t.inspect}!"
       end
     end

@@ -394,11 +394,11 @@ module SQLTree::Node
       # within an SQL query
       def to_sql(options = {})
         case value
-        when nil            then 'NULL'
-        when String         then quote_str(@value)
-        when Numeric        then @value.to_s
-        when Date           then @value.strftime("'%Y-%m-%d'")
-        when DateTime, Time then @value.strftime("'%Y-%m-%d %H:%M:%S'")
+        when nil;            'NULL'
+        when String;         quote_str(@value)
+        when Numeric;        @value.to_s
+        when Date;           @value.strftime("'%Y-%m-%d'")
+        when DateTime, Time; @value.strftime("'%Y-%m-%d %H:%M:%S'")
         else raise "Don't know how te represent this value in SQL!"
         end
       end
