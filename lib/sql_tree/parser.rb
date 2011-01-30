@@ -112,13 +112,14 @@ class SQLTree::Parser
   #
   def parse!
     case self.peek
-    when SQLTree::Token::SELECT then SQLTree::Node::SelectQuery.parse(self)
-    when SQLTree::Token::INSERT then SQLTree::Node::InsertQuery.parse(self)
-    when SQLTree::Token::DELETE then SQLTree::Node::DeleteQuery.parse(self)
-    when SQLTree::Token::UPDATE then SQLTree::Node::UpdateQuery.parse(self)
-    when SQLTree::Token::BEGIN  then SQLTree::Node::BeginStatement.parse(self)
-    when SQLTree::Token::COMMIT then SQLTree::Node::CommitStatement.parse(self)
-    when SQLTree::Token::SET    then SQLTree::Node::SetQuery.parse(self)
+    when SQLTree::Token::SELECT;   SQLTree::Node::SelectQuery.parse(self)
+    when SQLTree::Token::INSERT;   SQLTree::Node::InsertQuery.parse(self)
+    when SQLTree::Token::DELETE;   SQLTree::Node::DeleteQuery.parse(self)
+    when SQLTree::Token::UPDATE;   SQLTree::Node::UpdateQuery.parse(self)
+    when SQLTree::Token::BEGIN;    SQLTree::Node::BeginStatement.parse(self)
+    when SQLTree::Token::COMMIT;   SQLTree::Node::CommitStatement.parse(self)
+    when SQLTree::Token::ROLLBACK; SQLTree::Node::RollbackStatement.parse(self)
+    when SQLTree::Token::SET;      SQLTree::Node::SetQuery.parse(self)
     else raise UnexpectedToken.new(self.peek)
     end
   end
